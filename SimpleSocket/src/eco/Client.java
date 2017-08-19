@@ -1,4 +1,4 @@
-package c.eco.java;
+package eco;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -6,12 +6,10 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
 
-/*
-    Este es un cliente de eco
-*/
-
-public class CEcoJava {
-
+/**
+ * @author tona created on 19/08/2017 for SimpleSocket.
+ */
+public class Client {
     public static void main(String[] args) {
         try{
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -48,5 +46,4 @@ public class CEcoJava {
             //aqui podriamos invocar al metodo main de nuevo
         }
     }
-    
 }

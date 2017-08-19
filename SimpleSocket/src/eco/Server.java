@@ -1,19 +1,16 @@
-package s.eco;
+package eco;
 
 import java.io.BufferedReader;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-/*
-    Servidor de eco
-*/
-
-public class SEco {
-
+/**
+ * @author tona created on 19/08/2017 for SimpleSocket.
+ */
+public class Server {
     public static void main(String[] args) {
         try{
             ServerSocket ss = new ServerSocket(1234);
@@ -34,7 +31,6 @@ public class SEco {
                         String eco = mensaje + "-> eco";
                         pw.println(eco);
                         pw.flush(); //el flush es debido a que a veces los mensajes se pierden en la pila de la tarjeta de red, con esto garantizamos que si envie
-                        continue;
                     }
                 }
             }
@@ -43,11 +39,4 @@ public class SEco {
             e.printStackTrace();
         }
     }
-    
 }
-
-/*
-
-    
-
-*/
