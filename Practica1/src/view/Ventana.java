@@ -16,7 +16,7 @@ import java.util.logging.Logger;
 /**
  * @author tona
  */
-public class SendFile extends javax.swing.JFrame {
+public class Ventana extends javax.swing.JFrame {
     private SocketEnvio socketEnvio;
     private String host = "localhost";
     private int port = 9999;
@@ -24,7 +24,7 @@ public class SendFile extends javax.swing.JFrame {
     /**
      * Creates new form EnviarArchivo
      */
-    public SendFile() {
+    public Ventana() {
         initComponents();
         myInitComponents();
     }
@@ -41,8 +41,6 @@ public class SendFile extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         jListFiles = new javax.swing.JList<>();
         btnChooser = new javax.swing.JButton();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        txtAreaOutput = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -57,10 +55,6 @@ public class SendFile extends javax.swing.JFrame {
             }
         });
 
-        txtAreaOutput.setColumns(20);
-        txtAreaOutput.setRows(5);
-        jScrollPane2.setViewportView(txtAreaOutput);
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -71,10 +65,9 @@ public class SendFile extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(labelTitle)
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(jScrollPane1)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 380, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 271, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(btnChooser)
                         .addGap(4, 4, 4)))
                 .addContainerGap())
@@ -85,11 +78,9 @@ public class SendFile extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(labelTitle)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnChooser))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 210, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnChooser)
                 .addContainerGap(25, Short.MAX_VALUE))
         );
 
@@ -106,9 +97,9 @@ public class SendFile extends javax.swing.JFrame {
             File files[] = jf.getSelectedFiles();
             for (File file : files) {
                 try {
-                    socketEnvio.sendFile(file);
+                    socketEnvio.sendFile(file); // Manda los archivos
                 } catch (IOException ex) {
-                    Logger.getLogger(SendFile.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(Ventana.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }
@@ -133,24 +124,26 @@ public class SendFile extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(SendFile.class.getName()).log(
+            java.util.logging.Logger.getLogger(Ventana.class.getName()).log(
                     java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(SendFile.class.getName()).log(
+            java.util.logging.Logger.getLogger(Ventana.class.getName()).log(
                     java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(SendFile.class.getName()).log(
+            java.util.logging.Logger.getLogger(Ventana.class.getName()).log(
                     java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(SendFile.class.getName()).log(
+            java.util.logging.Logger.getLogger(Ventana.class.getName()).log(
                     java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
+        //</editor-fold>
         //</editor-fold>
         //</editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(() -> {
-            new SendFile().setVisible(true);
+            new Ventana().setVisible(true);
         });
     }
 
@@ -158,9 +151,7 @@ public class SendFile extends javax.swing.JFrame {
     private javax.swing.JButton btnChooser;
     private javax.swing.JList<String> jListFiles;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JLabel labelTitle;
-    private javax.swing.JTextArea txtAreaOutput;
     // End of variables declaration//GEN-END:variables
 
     private void myInitComponents() {

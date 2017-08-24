@@ -24,6 +24,7 @@ public class ListTransferHandler extends TransferHandler {
         if (!support.isDrop()) {
             return false;
         }
+        // Para solo poder arrastrar archivos
         if (!support.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
             System.out.println("NO FILE");
             return false;
@@ -47,13 +48,10 @@ public class ListTransferHandler extends TransferHandler {
         }
 
         JList list = (JList) support.getComponent();
-        System.out.println("Nana");
         DefaultListModel model = new DefaultListModel();
-        System.out.println("Hola");
         list.setModel(model);
-        System.out.println("Gaga");
         List<File> dropppedFiles = null;
-        try {        
+        try {
             dropppedFiles = (List<File>) support.getTransferable().getTransferData(
                     DataFlavor.javaFileListFlavor);
             for (File file : dropppedFiles) {

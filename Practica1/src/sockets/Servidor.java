@@ -15,7 +15,7 @@ import java.net.Socket;
 /**
  * @author tona
  */
-public class Server {
+public class Servidor {
     public static void main(String[] args) {
         int puerto = 9999;
         int n;
