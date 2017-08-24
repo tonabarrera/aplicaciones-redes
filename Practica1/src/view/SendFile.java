@@ -11,7 +11,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.DropMode;
 import javax.swing.JFileChooser;
+import javax.swing.TransferHandler;
 import sockets.SocketEnvio;
 
 /**
@@ -152,10 +154,8 @@ public class SendFile extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new SendFile().setVisible(true);
-            }
+        java.awt.EventQueue.invokeLater(() -> {
+            new SendFile().setVisible(true);
         });
     }
 
@@ -170,5 +170,7 @@ public class SendFile extends javax.swing.JFrame {
 
     private void myInitComponents() {
         socketEnvio = new SocketEnvio(host, port);
+        jListFiles.setTransferHandler(new ListTransferHandler(TransferHandler.COPY, socketEnvio));
+        jListFiles.setDropMode(DropMode.INSERT);
     }
 }
