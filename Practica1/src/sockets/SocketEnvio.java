@@ -5,11 +5,7 @@
  */
 package sockets;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 
 /**
@@ -35,16 +31,15 @@ public class SocketEnvio {
         System.out.println("Conexion establecida");
         DataOutputStream dos = new DataOutputStream(cl.getOutputStream());
         DataInputStream dis = new DataInputStream(new FileInputStream(ruta));
-        
+
         dos.writeUTF(nombre);
         dos.flush();
         dos.writeLong(tam);
         dos.flush();
-        System.out.format("Enviando el archivo: %s...", nombre);
+        System.out.format("Enviando el archivo: %s...\n", nombre);
         while (enviados < tam) {
             byte[] b = new byte[1500];
             n = dis.read(b);
-            System.out.println("La otra n: " + n);
             dos.write(b, 0, n);
             dos.flush();
             enviados = enviados + n;

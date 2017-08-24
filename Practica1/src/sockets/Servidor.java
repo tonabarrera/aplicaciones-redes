@@ -27,14 +27,14 @@ public class Servidor {
             for (; ; ) {
                 System.out.println("Eperando conexion...");
                 Socket cl = s.accept();
-                System.out.format("Cliente conectado desde: %s : %s", 
-                        cl.getInetAddress(), cl.getPort());
+                System.out.format("Cliente conectado desde: %s : %s\n", cl.getInetAddress(),
+                        cl.getPort());
                 DataInputStream dis = new DataInputStream(cl.getInputStream());
                 String nombre = dis.readUTF();
                 long tam = dis.readLong();
                 DataOutputStream dos = new DataOutputStream(new FileOutputStream(nombre));
                 long recibidos = 0;
-                System.out.format("Escribiendo el archivo: %s", nombre);
+                System.out.format("Escribiendo el archivo: %s\n", nombre);
                 while (recibidos < tam) {
                     byte[] b = new byte[1500];
                     n = dis.read(b);
@@ -42,7 +42,7 @@ public class Servidor {
                     dos.flush();
                     recibidos = recibidos + n;
                 }
-                System.out.println("¡Archivo recibido!");
+                System.out.println("¡Archivo recibido!\n");
                 dos.close();
                 dis.close();
                 cl.close();
