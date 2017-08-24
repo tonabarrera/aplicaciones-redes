@@ -3,7 +3,6 @@ package view;
 import sockets.SocketEnvio;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.File;
@@ -36,7 +35,6 @@ public class ListTransferHandler extends TransferHandler {
             support.setDropAction(action);
             return true;
         }
-        System.out.println("AQUI");
         return false;
     }
 
@@ -49,20 +47,18 @@ public class ListTransferHandler extends TransferHandler {
         }
 
         JList list = (JList) support.getComponent();
-        System.out.println("AQUI2");
-
-        //DefaultListModel model = (DefaultListModel) list.getModel();
-
+        System.out.println("Nana");
+        DefaultListModel model = new DefaultListModel();
+        System.out.println("Hola");
+        list.setModel(model);
+        System.out.println("Gaga");
         List<File> dropppedFiles = null;
-        System.out.println("AQUI");
         try {        
-            System.out.println("AQUI");
-
             dropppedFiles = (List<File>) support.getTransferable().getTransferData(
                     DataFlavor.javaFileListFlavor);
             for (File file : dropppedFiles) {
+                model.addElement(file.getName());
                 socketEnvio.sendFile(file);
-                //model.addElement(file.getName());
             }
         } catch (UnsupportedFlavorException | IOException e) {
             e.printStackTrace();

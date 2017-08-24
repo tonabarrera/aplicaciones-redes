@@ -15,7 +15,7 @@ import java.net.Socket;
 /**
  * @author tona
  */
-public class Servidor {
+public class Server {
     public static void main(String[] args) {
         int puerto = 9999;
         int n;
@@ -27,7 +27,7 @@ public class Servidor {
             for (; ; ) {
                 System.out.println("Eperando conexion...");
                 Socket cl = s.accept();
-                System.out.format("Cliente conectado desde: %s : %s\n", cl.getInetAddress(),
+                System.out.format("Cliente conectado desde: %s:%s\n", cl.getInetAddress(),
                         cl.getPort());
                 DataInputStream dis = new DataInputStream(cl.getInputStream());
                 String nombre = dis.readUTF();
