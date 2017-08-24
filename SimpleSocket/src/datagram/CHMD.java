@@ -10,7 +10,7 @@ import java.net.InetAddress;
 /**
  * @author tona created on 24/08/2017 for SimpleSocket.
  */
-// Hacer un servicio de echo
+// Hacer un servicio de echo con buffers de 10 bytes
 public class CHMD {
     public static void main(String args[]) {
         try {
