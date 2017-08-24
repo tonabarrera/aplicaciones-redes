@@ -13,7 +13,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 /**
- *
  * @author tona
  */
 public class Servidor {
@@ -25,25 +24,25 @@ public class Servidor {
             s = new ServerSocket(puerto);
             s.setReuseAddress(true);
             System.out.println("Servicio iniciado...");
-            for(;;) {
+            for (; ; ) {
                 System.out.println("Eperando conexion...");
                 Socket cl = s.accept();
-                System.out.println("Cliente conectado desde: " + cl.getInetAddress() + " : " + cl.getPort());
+                System.out.format("Cliente conectado desde: %s : %s", 
+                        cl.getInetAddress(), cl.getPort());
                 DataInputStream dis = new DataInputStream(cl.getInputStream());
                 String nombre = dis.readUTF();
                 long tam = dis.readLong();
                 DataOutputStream dos = new DataOutputStream(new FileOutputStream(nombre));
                 long recibidos = 0;
-                System.out.println("Escribiendo el archivo: " + nombre);
-                while (recibidos<tam) {
+                System.out.format("Escribiendo el archivo: %s", nombre);
+                while (recibidos < tam) {
                     byte[] b = new byte[1500];
                     n = dis.read(b);
-                    System.out.println("El valor de n: " + n);
                     dos.write(b, 0, n);
                     dos.flush();
                     recibidos = recibidos + n;
                 }
-                System.out.println("Archivo recibido");
+                System.out.println("¡Archivo recibido!");
                 dos.close();
                 dis.close();
                 cl.close();
