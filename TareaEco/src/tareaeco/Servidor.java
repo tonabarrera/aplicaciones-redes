@@ -21,7 +21,7 @@ public class Servidor {
     public static void main(String[] args) {
         try {
             //inetaddress es del que genero
-            int puerto = 5000;
+            int puerto = 7000;
             DatagramSocket s = null;
             String msg = "salir";
             s = new DatagramSocket(puerto);
