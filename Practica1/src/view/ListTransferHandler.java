@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.List;
 
 public class ListTransferHandler extends TransferHandler {
-    int action;
+    private int action;
     private final SocketEnvio socketEnvio;
 
     ListTransferHandler(int action, SocketEnvio socketEnvio) {
@@ -24,7 +24,7 @@ public class ListTransferHandler extends TransferHandler {
         if (!support.isDrop()) {
             return false;
         }
-        // Para solo poder arrastrar archivos
+        // Para solo poder arrastrar archivos/carpetas
         if (!support.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
             System.out.println("NO FILE");
             return false;
@@ -51,14 +51,13 @@ public class ListTransferHandler extends TransferHandler {
         list.setModel(model);
         List<File> dropppedFiles = null;
         try {
-            dropppedFiles = (List<File>) support.getTransferable().getTransferData(
-                    DataFlavor.javaFileListFlavor);
+            dropppedFiles = (List<File>) support.getTransferable()
+                    .getTransferData(DataFlavor.javaFileListFlavor);
             for (File file : dropppedFiles) {
                 model.addElement(file.getName());
-                if (file.isDirectory())
-                        socketEnvio.enviarCarpetas(file, ""); // Manda las carpetas recursivamente
-                    else
-                        socketEnvio.enviarArchivo(file, ""); // Manda un solo archivo
+                // Manda las carpetas recursivamente
+                if (file.isDirectory()) socketEnvio.enviarCarpetas(file, "");
+                else socketEnvio.enviarArchivo(file, ""); // Manda un solo archivo
             }
         } catch (UnsupportedFlavorException | IOException e) {
             e.printStackTrace();

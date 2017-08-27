@@ -33,28 +33,25 @@ public class Servidor {
                 DataInputStream dis = new DataInputStream(cl.getInputStream());
                 String destino = dis.readUTF();
                 String nombre = dis.readUTF();
+
                 if (!destino.equals("")) {
-                    System.out.println("Entro " + destino);
                     File nuevo = new File(destino);
                     if (!nuevo.exists()) {
-                        System.out.println("creating directory: " + nuevo.getName());
-                        boolean result = false;
-                        try{
-                            nuevo.mkdir();
-                            result = true;
-                        } catch(SecurityException se){
+                        try {
+                            if (nuevo.mkdir()) System.out.println("carpeta creada");
+                            else System.out.println("No se pudo crear la carpeta");
+                        } catch (SecurityException se) {
                             se.printStackTrace();
-                        }        
-                        if(result) {    
-                            System.out.println("DIR created"); 
                         }
                     }
-                    nombre = destino + "\\" + nombre; 
+                    nombre = destino + "\\" + nombre;
                 }
+
                 long tam = dis.readLong();
                 DataOutputStream dos = new DataOutputStream(new FileOutputStream(nombre));
                 long recibidos = 0;
                 System.out.format("Escribiendo el archivo: %s\n", nombre);
+
                 while (recibidos < tam) {
                     byte[] b = new byte[1500];
                     n = dis.read(b);
@@ -62,6 +59,7 @@ public class Servidor {
                     dos.flush();
                     recibidos = recibidos + n;
                 }
+                
                 System.out.println("¡Archivo recibido!\n");
                 dos.close();
                 dis.close();

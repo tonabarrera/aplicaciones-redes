@@ -58,31 +58,28 @@ public class Ventana extends javax.swing.JFrame {
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(labelTitle)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 380, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(btnChooser)
-                        .addGap(4, 4, 4)))
-                .addContainerGap())
-        );
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
+                        layout.createSequentialGroup().addContainerGap()
+                                .addGroup(layout.createParallelGroup(
+                                        javax.swing.GroupLayout.Alignment.LEADING).addGroup(
+                                        layout.createSequentialGroup().addComponent(labelTitle)
+                                                .addGap(0, 0, Short.MAX_VALUE))
+                                        .addComponent(jScrollPane1,
+                                                javax.swing.GroupLayout.DEFAULT_SIZE, 380,
+                                                Short.MAX_VALUE)
+                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING,
+                                                layout.createSequentialGroup().addGap(0, 0,
+                                                        Short.MAX_VALUE).addComponent(btnChooser)
+                                                        .addGap(4, 4, 4))).addContainerGap()));
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(labelTitle)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 210, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnChooser)
-                .addContainerGap(25, Short.MAX_VALUE))
-        );
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup().addContainerGap().addComponent(
+                                labelTitle).addPreferredGap(
+                                javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(
+                                jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 210,
+                                javax.swing.GroupLayout.PREFERRED_SIZE).addPreferredGap(
+                                javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(btnChooser).addContainerGap(25, Short.MAX_VALUE)));
 
         labelTitle.getAccessibleContext().setAccessibleDescription("");
 
@@ -91,23 +88,22 @@ public class Ventana extends javax.swing.JFrame {
 
     private void btnChooserActionPerformed(java.awt.event.ActionEvent evt) {
         JFileChooser jf = new JFileChooser();
-        jf.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES );
+        jf.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
         jf.setMultiSelectionEnabled(true);
         int r = jf.showOpenDialog(this);
         if (r == JFileChooser.APPROVE_OPTION) {
             File files[] = jf.getSelectedFiles();
             for (File file : files) {
                 try {
-                    if (file.isDirectory())
-                        socketEnvio.enviarCarpetas(file, ""); // Manda las carpetas recursivamente
-                    else
-                        socketEnvio.enviarArchivo(file, ""); // Manda un solo archivo
+                    // Manda las carpetas recursivamente
+                    if (file.isDirectory()) socketEnvio.enviarCarpetas(file, "");
+                    else socketEnvio.enviarArchivo(file, ""); // Manda un solo archivo
                 } catch (IOException ex) {
                     Logger.getLogger(Ventana.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }
-    }                                          
+    }
 
     /**
      * @param args the command line arguments

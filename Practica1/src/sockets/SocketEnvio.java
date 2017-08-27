@@ -31,14 +31,17 @@ public class SocketEnvio {
         System.out.println("Conexion establecida");
         DataOutputStream dos = new DataOutputStream(cl.getOutputStream());
         DataInputStream dis = new DataInputStream(new FileInputStream(ruta));
-        dos.writeUTF(destino);
+
+        dos.writeUTF(destino); // Usamos destino para ir almacenando la ruta del archivo/carpeta
         dos.flush();
         dos.writeUTF(nombre);
         dos.flush();
         dos.writeLong(tam);
         dos.flush();
+
         System.out.format("Enviando el archivo: %s...\n", nombre);
-        System.out.format("Que esta en la ruta: %s %s %s %s\n", ruta, file.getCanonicalPath(), file.getParent(), file.getPath());
+        System.out.format("Que esta en la ruta: %s\n", ruta);
+
         while (enviados < tam) {
             byte[] b = new byte[1500];
             n = dis.read(b);
@@ -48,25 +51,24 @@ public class SocketEnvio {
             porcentaje = (int) (enviados * 100 / tam);
             System.out.println("\rSe ha transmitido el: " + porcentaje + "% ...");
         }
+
         System.out.println("Archivo enviado");
         cl.close();
         dos.close();
         dis.close();
     }
 
+    // el parametro destino nos permite guardar la ubicacion del archivo
     public void enviarCarpetas(File carpeta, String destino) throws IOException {
         System.out.format("Carpeta %s con los archivos:\n", carpeta.getName());
-        if (destino.equals(""))
-            destino = carpeta.getName();
-        else
-            destino = destino + "\\" + carpeta.getName();
+
+        if (destino.equals("")) destino = carpeta.getName(); // evita que se cree en c:\\
+        else destino = destino + "\\" + carpeta.getName(); // manejar la ruta de los archivos
+
         for (File file : carpeta.listFiles()) {
-			if (file.isDirectory()) {
-				enviarCarpetas(file, destino);
-			} else {
-				enviarArchivo(file, destino);
-			}
-		}
+            if (file.isDirectory()) enviarCarpetas(file, destino);
+            else enviarArchivo(file, destino);
+        }
     }
 
 }
