@@ -91,13 +91,17 @@ public class Ventana extends javax.swing.JFrame {
 
     private void btnChooserActionPerformed(java.awt.event.ActionEvent evt) {
         JFileChooser jf = new JFileChooser();
+        jf.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES );
         jf.setMultiSelectionEnabled(true);
         int r = jf.showOpenDialog(this);
         if (r == JFileChooser.APPROVE_OPTION) {
             File files[] = jf.getSelectedFiles();
             for (File file : files) {
                 try {
-                    socketEnvio.sendFile(file); // Manda los archivos
+                    if (file.isDirectory())
+                        socketEnvio.enviarCarpetas(file, ""); // Manda las carpetas recursivamente
+                    else
+                        socketEnvio.enviarArchivo(file, ""); // Manda un solo archivo
                 } catch (IOException ex) {
                     Logger.getLogger(Ventana.class.getName()).log(Level.SEVERE, null, ex);
                 }

@@ -19,7 +19,7 @@ public class Cliente {
             String msj;
             int i;
             int paquetes;
-            int restante,j; 
+            int restante,j;
             byte[] bytesMensaje;
             do{
                 System.out.println("Escribe: ");
@@ -28,36 +28,28 @@ public class Cliente {
                 paquetes = bytesMensaje.length/BUFFER;
                 restante = bytesMensaje.length % BUFFER;
                 for(i=0,j=0; j<paquetes;i=i+BUFFER, j++){
-                    DatagramPacket datagrama = 
-                            new DatagramPacket(bytesMensaje, 
-                                               i, 
-                                               BUFFER, 
-                                               InetAddress.getByName("localhost"),
-                                               7000);
+                    DatagramPacket datagrama = new DatagramPacket(bytesMensaje, i, BUFFER,
+                            InetAddress.getByName("localhost"), 7000);
                     socketCliente.send(datagrama);
-                    DatagramPacket datagramaRespuesta = 
-                            new DatagramPacket(new byte[1500], 1500);
+
+                    DatagramPacket datagramaRespuesta = new DatagramPacket(new byte[1500], 1500);
                     socketCliente.receive(datagramaRespuesta);
                     System.out.println("Respuesta desde: "
-                            +datagramaRespuesta.getAddress()
-                            +":"+datagramaRespuesta.getPort()
-                            +" con:"+new String(
+                            + datagramaRespuesta.getAddress()
+                            + ":"+datagramaRespuesta.getPort()
+                            + " con:"+new String(
                                     datagramaRespuesta.getData(),
                                     0,
                                     datagramaRespuesta.getLength()));
                     System.out.println(i);
-                } 
+                }
                 System.out.println(bytesMensaje.length);
                 if(restante!=0){
-                    DatagramPacket datagrama = 
-                            new DatagramPacket(bytesMensaje, 
-                                               bytesMensaje.length-restante, 
-                                               restante, 
-                                               InetAddress.getByName("localhost"),
-                                               7000);
+                    DatagramPacket datagrama = new DatagramPacket(bytesMensaje,
+                            bytesMensaje.length-restante, restante,
+                            InetAddress.getByName("localhost"), 7000);
                     socketCliente.send(datagrama);
-                    DatagramPacket datagramaRespuesta = 
-                            new DatagramPacket(new byte[1500], 1500);
+                    DatagramPacket datagramaRespuesta = new DatagramPacket(new byte[1500], 1500);
                     socketCliente.receive(datagramaRespuesta);
                     System.out.println("Respuesta desde: "
                             +datagramaRespuesta.getAddress()
@@ -67,10 +59,8 @@ public class Cliente {
                                     0,
                                     datagramaRespuesta.getLength()));
                 }
-            }while(msj.compareToIgnoreCase("salir")!=0);
-            
-            
-        }catch(Exception e){
+            } while(msj.compareToIgnoreCase("salir")!=0);
+        } catch(Exception e){
             e.printStackTrace();
         }
     }

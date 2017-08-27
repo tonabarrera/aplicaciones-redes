@@ -20,7 +20,7 @@ public class SocketEnvio {
         this.port = port;
     }
 
-    public void sendFile(File file) throws IOException {
+    public void enviarArchivo(File file, String destino) throws IOException {
         Socket cl = new Socket(host, port);
         String nombre = file.getName();
         long tam = file.length();
@@ -31,12 +31,14 @@ public class SocketEnvio {
         System.out.println("Conexion establecida");
         DataOutputStream dos = new DataOutputStream(cl.getOutputStream());
         DataInputStream dis = new DataInputStream(new FileInputStream(ruta));
-
+        dos.writeUTF(destino);
+        dos.flush();
         dos.writeUTF(nombre);
         dos.flush();
         dos.writeLong(tam);
         dos.flush();
         System.out.format("Enviando el archivo: %s...\n", nombre);
+        System.out.format("Que esta en la ruta: %s %s %s %s\n", ruta, file.getCanonicalPath(), file.getParent(), file.getPath());
         while (enviados < tam) {
             byte[] b = new byte[1500];
             n = dis.read(b);
@@ -50,6 +52,21 @@ public class SocketEnvio {
         cl.close();
         dos.close();
         dis.close();
+    }
+
+    public void enviarCarpetas(File carpeta, String destino) throws IOException {
+        System.out.format("Carpeta %s con los archivos:\n", carpeta.getName());
+        if (destino.equals(""))
+            destino = carpeta.getName();
+        else
+            destino = destino + "\\" + carpeta.getName();
+        for (File file : carpeta.listFiles()) {
+			if (file.isDirectory()) {
+				enviarCarpetas(file, destino);
+			} else {
+				enviarArchivo(file, destino);
+			}
+		}
     }
 
 }

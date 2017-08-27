@@ -30,7 +30,6 @@ public class ListTransferHandler extends TransferHandler {
             return false;
         }
 
-
         boolean actionSupported = (action & support.getSourceDropActions()) == action;
         if (actionSupported) {
             support.setDropAction(action);
@@ -56,7 +55,10 @@ public class ListTransferHandler extends TransferHandler {
                     DataFlavor.javaFileListFlavor);
             for (File file : dropppedFiles) {
                 model.addElement(file.getName());
-                socketEnvio.sendFile(file);
+                if (file.isDirectory())
+                        socketEnvio.enviarCarpetas(file, ""); // Manda las carpetas recursivamente
+                    else
+                        socketEnvio.enviarArchivo(file, ""); // Manda un solo archivo
             }
         } catch (UnsupportedFlavorException | IOException e) {
             e.printStackTrace();

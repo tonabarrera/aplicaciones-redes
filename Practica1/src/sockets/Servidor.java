@@ -7,6 +7,7 @@ package sockets;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -30,7 +31,26 @@ public class Servidor {
                 System.out.format("Cliente conectado desde: %s:%s\n", cl.getInetAddress(),
                         cl.getPort());
                 DataInputStream dis = new DataInputStream(cl.getInputStream());
+                String destino = dis.readUTF();
                 String nombre = dis.readUTF();
+                if (!destino.equals("")) {
+                    System.out.println("Entro " + destino);
+                    File nuevo = new File(destino);
+                    if (!nuevo.exists()) {
+                        System.out.println("creating directory: " + nuevo.getName());
+                        boolean result = false;
+                        try{
+                            nuevo.mkdir();
+                            result = true;
+                        } catch(SecurityException se){
+                            se.printStackTrace();
+                        }        
+                        if(result) {    
+                            System.out.println("DIR created"); 
+                        }
+                    }
+                    nombre = destino + "\\" + nombre; 
+                }
                 long tam = dis.readLong();
                 DataOutputStream dos = new DataOutputStream(new FileOutputStream(nombre));
                 long recibidos = 0;
