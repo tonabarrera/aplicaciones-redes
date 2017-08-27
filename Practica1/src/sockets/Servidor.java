@@ -59,7 +59,7 @@ public class Servidor {
                     dos.flush();
                     recibidos = recibidos + n;
                 }
-                
+
                 System.out.println("¡Archivo recibido!\n");
                 dos.close();
                 dis.close();
