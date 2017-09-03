@@ -28,6 +28,7 @@ public class SocketEnvio {
         int porcentaje;
         int n;
         String ruta = file.getAbsolutePath();
+
         System.out.println("Conexion establecida");
         DataOutputStream dos = new DataOutputStream(cl.getOutputStream());
         DataInputStream dis = new DataInputStream(new FileInputStream(ruta));
