@@ -5,3 +5,5 @@
 *.pptx
 *.doc
 /TareaEco/build/
+/DatagramaArchivos/nbproject/private/
+/DatagramaArchivos/build/
