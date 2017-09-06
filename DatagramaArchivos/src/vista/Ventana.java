@@ -1,8 +1,12 @@
 package vista;
 
-import javax.swing.DropMode;
-import javax.swing.TransferHandler;
+import javax.swing.*;
+
 import sockets.Envio;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.SocketException;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -11,11 +15,13 @@ import sockets.Envio;
  */
 
 /**
- *
  * @author tona
  */
 public class Ventana extends javax.swing.JFrame {
     private Envio socketEnvio;
+    private File files[];
+    private static final String HANA = "hola";
+
     /**
      * Creates new form Vista
      */
@@ -43,6 +49,11 @@ public class Ventana extends javax.swing.JFrame {
         jScrollPane1.setViewportView(jListArchivos);
 
         btnEnviar.setText("Enviar");
+        btnEnviar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEnviarActionPerformed(evt);
+            }
+        });
 
         jLabel1.setText("Arrastra o selecciona tus archivos a enviar");
 
@@ -56,41 +67,67 @@ public class Ventana extends javax.swing.JFrame {
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 380, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(btnSeleccionar)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnEnviar))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel1)
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
-        );
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
+                        layout.createSequentialGroup().addContainerGap()
+                                .addGroup(layout.createParallelGroup(
+                                        javax.swing.GroupLayout.Alignment.LEADING).addComponent(
+                                        jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 380,
+                                        Short.MAX_VALUE)
+                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING,
+                                                layout.createSequentialGroup().addGap(0, 0,
+                                                        Short.MAX_VALUE).addComponent(
+                                                        btnSeleccionar).addPreferredGap(
+                                                        javax.swing.LayoutStyle
+                                                                .ComponentPlacement.RELATED)
+                                                        .addComponent(btnEnviar)).addGroup(
+                                                layout.createSequentialGroup().addComponent(jLabel1)
+                                                        .addGap(0, 0, Short.MAX_VALUE)))
+                                .addContainerGap()));
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 231, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnEnviar)
-                    .addComponent(btnSeleccionar))
-                .addContainerGap())
-        );
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup().addContainerGap(
+                                javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).addComponent(
+                                jLabel1).addPreferredGap(
+                                javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(
+                                jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 231,
+                                javax.swing.GroupLayout.PREFERRED_SIZE).addPreferredGap(
+                                javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(
+                                        javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(btnEnviar).addComponent(btnSeleccionar))
+                                .addContainerGap()));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnSeleccionarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSeleccionarActionPerformed
+    private void btnSeleccionarActionPerformed(
+            java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSeleccionarActionPerformed
         // TODO add your handling code here:
+        JFileChooser jf = new JFileChooser();
+        jf.setMultiSelectionEnabled(true);
+        jf.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+        int respuesta = jf.showDialog(this, "Seleccionar");
+        if (respuesta == JFileChooser.APPROVE_OPTION) {
+            files = jf.getSelectedFiles();
+        }
     }//GEN-LAST:event_btnSeleccionarActionPerformed
+
+    private void btnEnviarActionPerformed(
+            java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEnviarActionPerformed
+        // TODO add your handling code here:
+        if (files.length > 0) {
+            for (File f : files) {
+                try {
+                    socketEnvio.enviarArchivo(f, "");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            files = null;
+        } else {
+            System.out.println("No hay archivos que enviar");
+        }
+    }//GEN-LAST:event_btnEnviarActionPerformed
 
     /**
      * @param args the command line arguments
@@ -98,42 +135,41 @@ public class Ventana extends javax.swing.JFrame {
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and
+        feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
          */
         try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager
+                    .getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
                     break;
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(Ventana.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Ventana.class.getName())
+                    .log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(Ventana.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Ventana.class.getName())
+                    .log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(Ventana.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Ventana.class.getName())
+                    .log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(Ventana.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Ventana.class.getName())
+                    .log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new Ventana().setVisible(true);
-            }
-        });
+        java.awt.EventQueue.invokeLater(() -> new Ventana().setVisible(true));
     }
-    
+
     private void myInitComponents() {
-
         socketEnvio = new Envio();
-
         jListArchivos.setTransferHandler(new ListTransferHandler(TransferHandler.COPY, socketEnvio));
-
         jListArchivos.setDropMode(DropMode.INSERT);
 
     }
