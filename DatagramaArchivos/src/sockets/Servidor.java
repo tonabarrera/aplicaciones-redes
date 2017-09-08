@@ -13,15 +13,16 @@ import java.net.DatagramSocket;
  * @author tona
  */
 public class Servidor {
-
+    public static int PUERTO = 5000;
+    private static final int TAM_PAQUETE = 6500;
     public static void main(String args[]) throws IOException, ClassNotFoundException {
-        DatagramSocket socket = new DatagramSocket(5000);
+        DatagramSocket socket = new DatagramSocket(PUERTO);
         DataOutputStream dos = null;
         int recibidos = 0;
         for (; ; ) {
-            DatagramPacket packet = new DatagramPacket(new byte[6500], 6500);
-            socket.receive(packet);
-            Archivo archivo = recuperarArchivo(packet);
+            DatagramPacket paqueteRecibido = new DatagramPacket(new byte[TAM_PAQUETE], TAM_PAQUETE);
+            socket.receive(paqueteRecibido);
+            Archivo archivo = recuperarArchivo(paqueteRecibido);
             String destino = archivo.getRuta();
             String ruta = archivo.getNombre();
             if (!destino.equals("")) {
@@ -51,6 +52,7 @@ public class Servidor {
             }
             // Esto solo es de adorno para que no me marque error el editor
             if (archivo.getNombre().equals("FIN")) break;
+            socket.send(paqueteRecibido);
         }
         socket.close();
     }
