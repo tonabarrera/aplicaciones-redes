@@ -1,5 +1,6 @@
 package datagram.multicast;
 
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -29,7 +30,8 @@ public class EnviaUDP {
         socket.setTimeToLive(TTL);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream(6400);
-        ObjectOutputStream oos = new ObjectOutputStream(baos);
+        ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(baos));
+        oos.flush();
         oos.writeObject(o);
         oos.flush();
         byte[] data = baos.toByteArray();

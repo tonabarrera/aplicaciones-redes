@@ -2,6 +2,7 @@ package datagram.multicast;
 
 import object.Objeto;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -30,7 +31,7 @@ public class RecibeUDP {
 
         ByteArrayInputStream baos = new ByteArrayInputStream(packet.getData());
 
-        ObjectInputStream ois = new ObjectInputStream(baos);
+        ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(baos));
         object.Objeto o2 = (Objeto) ois.readObject();
         System.out.println(o2.toString());
 
