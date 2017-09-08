@@ -6,7 +6,6 @@ import sockets.Envio;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.SocketException;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -19,8 +18,7 @@ import java.net.SocketException;
  */
 public class Ventana extends javax.swing.JFrame {
     private Envio socketEnvio;
-    private File files[];
-    private static final String HANA = "hola";
+    private File archivos[];
 
     /**
      * Creates new form Vista
@@ -108,22 +106,22 @@ public class Ventana extends javax.swing.JFrame {
         jf.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
         int respuesta = jf.showDialog(this, "Seleccionar");
         if (respuesta == JFileChooser.APPROVE_OPTION) {
-            files = jf.getSelectedFiles();
+            archivos = jf.getSelectedFiles();
         }
     }//GEN-LAST:event_btnSeleccionarActionPerformed
 
     private void btnEnviarActionPerformed(
             java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEnviarActionPerformed
         // TODO add your handling code here:
-        if (files.length > 0) {
-            for (File f : files) {
+        if (archivos != null && archivos.length > 0) {
+            for (File f : archivos) {
                 try {
                     socketEnvio.enviarArchivo(f, "");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
-            files = null;
+            archivos = null;
         } else {
             System.out.println("No hay archivos que enviar");
         }

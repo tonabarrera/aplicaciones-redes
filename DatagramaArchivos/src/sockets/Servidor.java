@@ -18,9 +18,12 @@ public class Servidor {
     public static void main(String args[]) throws IOException, ClassNotFoundException {
         DatagramSocket socket = new DatagramSocket(PUERTO);
         DataOutputStream dos = null;
+        DatagramPacket paqueteRecibido = new DatagramPacket(new byte[TAM_PAQUETE], TAM_PAQUETE);
         int recibidos = 0;
+
+        System.out.println("Servidor iniciado...");
         for (; ; ) {
-            DatagramPacket paqueteRecibido = new DatagramPacket(new byte[TAM_PAQUETE], TAM_PAQUETE);
+            System.out.println("Recibiendo informacion...");
             socket.receive(paqueteRecibido);
             Archivo archivo = recuperarArchivo(paqueteRecibido);
             String destino = archivo.getRuta();
@@ -39,9 +42,13 @@ public class Servidor {
             }
             File f = new File(ruta);
             if (f.exists()) {
-                if (recibidos == archivo.getTam() && dos != null) {
-                    dos.close();
-                    recibidos = 0;
+                if (dos != null) {
+                    if (recibidos == archivo.getTam()) {
+                        dos.close();
+                        recibidos = 0;
+                    } else {
+                        //dos = new DataOutputStream(new FileOutputStream(ruta));
+                    }
                 }
             } else {
                 dos = new DataOutputStream(new FileOutputStream(ruta));
@@ -53,6 +60,7 @@ public class Servidor {
             // Esto solo es de adorno para que no me marque error el editor
             if (archivo.getNombre().equals("FIN")) break;
             socket.send(paqueteRecibido);
+            paqueteRecibido.setLength(TAM_PAQUETE);
         }
         socket.close();
     }

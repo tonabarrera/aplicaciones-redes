@@ -40,16 +40,16 @@ public class Envio {
             ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(baos));
             oos.flush();
 
-            byte[] b = new byte[1500];
-            fraccion = dis.read(b);
+            byte[] b = new byte[4000]; // Maximo se van a leer 4000 bytes del archivo
+            fraccion = dis.read(b); // bytes que se leyeron
             a.setDatos(b);
             a.setBytesEnviados(fraccion);
-            System.out.println("Bytes enviados: " + a.getBytesEnviados());
+            System.out.println("Bytes leidos en el buffer de lectura: " + a.getBytesEnviados());
 
             oos.writeObject(a);
             oos.flush();
             byte[] datos = baos.toByteArray();
-            System.out.println("Data: " + datos.length);
+            System.out.println("Tam paquete buffer: " + datos.length);
             DatagramPacket paqueteEnvio = new DatagramPacket(datos, datos.length, servidor, PUERTO);
 
             DatagramPacket paqueteConfirmacion = new DatagramPacket(new byte[datos.length],
@@ -68,7 +68,7 @@ public class Envio {
                 }
             } while (!respuesta && intentos < INTENTOS_MAX);
 
-            if (respuesta) System.out.println("Recibi la confirmacion");
+            if (respuesta) System.out.println("Recibi la confirmacion del servidor continuando...");
             else System.out.println("Sin respuesta - me doy");
 
             enviado += fraccion;
@@ -80,6 +80,7 @@ public class Envio {
 //                e.printStackTrace();
 //            }
         }
+        System.out.println("Cerrando todo...");
         socket.close();
         dis.close();
     }
