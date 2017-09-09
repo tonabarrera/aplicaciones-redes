@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package view;
 
 import sockets.SocketEnvio;
@@ -18,8 +13,13 @@ import java.util.logging.Logger;
  */
 public class Ventana extends javax.swing.JFrame {
     private SocketEnvio socketEnvio;
-    private String host = "localhost";
-    private int port = 9999;
+    private static final String HOST = "localhost";
+    private static final int PORT = 9999;
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnChooser;
+    private javax.swing.JList<String> jListFiles;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JLabel labelTitle;
 
     /**
      * Creates new form EnviarArchivo
@@ -27,6 +27,48 @@ public class Ventana extends javax.swing.JFrame {
     public Ventana() {
         initComponents();
         myInitComponents();
+    }
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[]) {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and
+        feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager
+                    .getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(Ventana.class.getName()).log(
+                    java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(Ventana.class.getName()).log(
+                    java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(Ventana.class.getName()).log(
+                    java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(Ventana.class.getName()).log(
+                    java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(() -> {
+            new Ventana().setVisible(true);
+        });
     }
 
     /**
@@ -87,76 +129,36 @@ public class Ventana extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnChooserActionPerformed(java.awt.event.ActionEvent evt) {
+        // file chooser que acepta multiples archivos y carpetas
         JFileChooser jf = new JFileChooser();
         jf.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
         jf.setMultiSelectionEnabled(true);
         int r = jf.showOpenDialog(this);
+
         if (r == JFileChooser.APPROVE_OPTION) {
-            File files[] = jf.getSelectedFiles();
-            for (File file : files) {
+            File archivos[] = jf.getSelectedFiles();
+            for (File archivo : archivos) {
                 try {
                     // Manda las carpetas recursivamente
-                    if (file.isDirectory()) socketEnvio.enviarCarpetas(file, "");
-                    else socketEnvio.enviarArchivo(file, ""); // Manda un solo archivo
+                    if (archivo.isDirectory()) socketEnvio.enviarCarpetas(archivo, "");
+                    else socketEnvio.enviarArchivo(archivo, ""); // Manda un solo archivo
                 } catch (IOException ex) {
                     Logger.getLogger(Ventana.class.getName()).log(Level.SEVERE, null, ex);
+                    JOptionPane.showMessageDialog(this,
+                            "Error al enviar archivos", "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
+            JOptionPane.showMessageDialog(this, "Archivo(s) enviado(s)");
         }
     }
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and
-        feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager
-                    .getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(Ventana.class.getName()).log(
-                    java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(Ventana.class.getName()).log(
-                    java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(Ventana.class.getName()).log(
-                    java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(Ventana.class.getName()).log(
-                    java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> {
-            new Ventana().setVisible(true);
-        });
-    }
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnChooser;
-    private javax.swing.JList<String> jListFiles;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JLabel labelTitle;
     // End of variables declaration//GEN-END:variables
 
     private void myInitComponents() {
-        socketEnvio = new SocketEnvio(host, port);
+        // Creamos nuestro socket de envio
+        socketEnvio = new SocketEnvio(HOST, PORT);
+        // Utilizamos drag an drop sobre la jList
         jListFiles.setTransferHandler(new ListTransferHandler(TransferHandler.COPY, socketEnvio));
+        // la posiscion en la que se inserte sera la que ocupe en la jList
         jListFiles.setDropMode(DropMode.INSERT);
     }
 }
