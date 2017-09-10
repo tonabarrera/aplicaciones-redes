@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package sockets;
 
 import java.io.*;
@@ -33,10 +28,13 @@ public class SocketEnvio {
         DataOutputStream dos = new DataOutputStream(cl.getOutputStream());
         DataInputStream dis = new DataInputStream(new FileInputStream(ruta));
 
-        dos.writeUTF(destino); // Usamos destino para ir almacenando la ruta del archivo/carpeta
+        // Usamos destino para ir almacenando la ruta del archivo/carpeta
+        dos.writeUTF(destino);
         dos.flush();
+        // Despues mandamos el nombre del archivo
         dos.writeUTF(nombre);
         dos.flush();
+        // Y finalmente su tamaño
         dos.writeLong(tam);
         dos.flush();
 
@@ -64,8 +62,7 @@ public class SocketEnvio {
         System.out.format("Carpeta %s con los archivos:\n", carpeta.getName());
 
         if (destino.equals("")) destino = carpeta.getName(); // evita que se cree en c:\\
-        else destino = destino + "\\" + carpeta.getName(); // manejar la ruta de los archivos
-
+        else destino = destino + "\\" + carpeta.getName(); // concatenar la ruta de los archivos
         for (File file : carpeta.listFiles()) {
             if (file.isDirectory()) enviarCarpetas(file, destino);
             else enviarArchivo(file, destino);
