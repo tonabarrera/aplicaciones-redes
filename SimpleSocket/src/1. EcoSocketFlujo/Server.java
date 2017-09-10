@@ -15,13 +15,19 @@ public class Server {
         try{
             ServerSocket ss = new ServerSocket(1234);
             System.out.println("Servicio iniciado. Esperando clientes...");
+            //Servidor TCP de tipo bloqueante
             while(true){
+                //Acepta una conexión directa a la vez
                 Socket nw = ss.accept();
+                //Canales (manejo de caracteres)
                 PrintWriter pw = new PrintWriter(new OutputStreamWriter(nw.getOutputStream()));
                 BufferedReader br = new BufferedReader(new InputStreamReader(nw.getInputStream()));
+                //La conexión al ser directa permanece abierta hasta cierta condición
                 while(true){
                     String mensaje = br.readLine();
+                    //Condición para terminar la conexión
                     if(mensaje.compareToIgnoreCase("salir") == 0){
+                        //Cerrando canales y socket de flujo
                         pw.close();
                         br.close();
                         nw.close();

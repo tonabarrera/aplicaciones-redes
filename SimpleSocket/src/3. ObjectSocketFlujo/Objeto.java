@@ -8,7 +8,7 @@ import java.io.Serializable;
 public class Objeto implements Serializable{
     String nombre;
     int edad;
-    float sueldo; //traient evita que se envie
+    float sueldo; //transient evita que se envie
     public Objeto(String nombre, int edad, float sueldo) {
         this.nombre = nombre;
         this.edad = edad;
