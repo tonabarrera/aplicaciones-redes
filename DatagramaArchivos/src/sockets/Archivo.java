@@ -12,11 +12,13 @@ public class Archivo implements Serializable{
     private long tam;
     private byte[] datos;
     private int bytesEnviados;
+    private String clave;
 
-    public Archivo(String nombre, String ruta, long tam) {
+    public Archivo(String nombre, String ruta, long tam, String clave) {
         this.nombre = nombre;
         this.ruta = ruta;
         this.tam = tam;
+        this.clave = clave;
     }
 
     public String getNombre() {
@@ -59,14 +61,19 @@ public class Archivo implements Serializable{
         this.bytesEnviados = bytesEnviados;
     }
 
+    public String getClave() {
+        return clave;
+    }
+
+    public void setClave(String clave) {
+        this.clave = clave;
+    }
+
     @Override
     public String toString() {
-        return "Archivo{" +
-                "nombre='" + nombre + '\'' +
-                ", ruta='" + ruta + '\'' +
-                ", tam=" + tam +
-                ", datos=" + Arrays.toString(datos) +
-                ", bytesEnviados=" + bytesEnviados +
-                '}';
+        return "Archivo{" + "nombre='" + nombre + '\'' + ", ruta='" + ruta + '\'' + ", tam=" +
+                tam + ", datos=" + Arrays
+                .toString(
+                        datos) + ", bytesEnviados=" + bytesEnviados + ", clave='" + clave + '\'' + '}';
     }
 }

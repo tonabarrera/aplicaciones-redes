@@ -10,6 +10,8 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  *
@@ -22,6 +24,13 @@ public class Envio {
 
     public void enviarArchivo(File archivo, String destino) throws IOException {
         DatagramSocket socket = new DatagramSocket();
+        FileInputStream fis = new FileInputStream(archivo.getAbsolutePath());
+        String clave = "ERROR";
+        try {
+            clave = obtenerClaveHash(fis);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
         DataInputStream dis = new DataInputStream(new FileInputStream(archivo.getAbsolutePath()));
         InetAddress servidor = InetAddress.getByName("localhost");
 
@@ -34,7 +43,7 @@ public class Envio {
             int intentos = 0;
             boolean respuesta = false;
 
-            Archivo a = new Archivo(archivo.getName(), destino, archivo.length());
+            Archivo a = new Archivo(archivo.getName(), destino, archivo.length(), clave);
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream(6400);
             ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(baos));
@@ -94,5 +103,26 @@ public class Envio {
             if (file.isDirectory()) enviarCarpetas(file, destino);
             else enviarArchivo(file, destino);
         }
+    }
+
+    public String obtenerClaveHash(FileInputStream fis) throws NoSuchAlgorithmException{
+        MessageDigest sha1 = MessageDigest.getInstance("SHA1");
+
+        byte[] datos = new byte[1024];
+        int leidos;
+        try {
+            while ((leidos = fis.leidos(datos)) != -1) {
+                sha1.update(datos, 0, leidos);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        byte[] hashBytes = sha1.digest();
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < hashBytes.length; i++) {
+            sb.append(Integer.toString((hashBytes[i] & 0xff) + 0x100, 16).substring(1));
+        }
+        return sb.toString();
     }
 }
