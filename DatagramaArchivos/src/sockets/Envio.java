@@ -84,4 +84,15 @@ public class Envio {
         socket.close();
         dis.close();
     }
+
+    public void enviarCarpetas(File carpeta, String destino) throws IOException {
+        System.out.format("Carpeta %s con los archivos:\n", carpeta.getName());
+
+        if (destino.equals("")) destino = carpeta.getName(); // evita que se cree en c:\\
+        else destino = destino + "\\" + carpeta.getName(); // concatenar la ruta de los archivos
+        for (File file : carpeta.listFiles()) {
+            if (file.isDirectory()) enviarCarpetas(file, destino);
+            else enviarArchivo(file, destino);
+        }
+    }
 }

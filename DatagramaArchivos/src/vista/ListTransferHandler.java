@@ -5,18 +5,16 @@
  */
 package vista;
 
-import java.awt.List;
+import sockets.Envio;
+
+import javax.swing.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.File;
 import java.io.IOException;
-import javax.swing.DefaultListModel;
-import javax.swing.JList;
-import javax.swing.TransferHandler;
-import sockets.Envio;
+import java.util.List;
 
 /**
- *
  * @author tona
  */
 
@@ -28,7 +26,6 @@ public class ListTransferHandler extends TransferHandler {
     private final Envio socketEnvio;
 
 
-
     ListTransferHandler(int action, Envio socketEnvio) {
 
         this.action = action;
@@ -36,7 +33,6 @@ public class ListTransferHandler extends TransferHandler {
         this.socketEnvio = socketEnvio;
 
     }
-
 
 
     @Override
@@ -62,7 +58,6 @@ public class ListTransferHandler extends TransferHandler {
         }
 
 
-
         boolean actionSupported = (action & support.getSourceDropActions()) == action;
 
         if (actionSupported) {
@@ -78,49 +73,36 @@ public class ListTransferHandler extends TransferHandler {
     }
 
 
-
     @Override
     public boolean importData(TransferHandler.TransferSupport support) {
-
-        // if we can't handle the import, say so
-
+        // Si no se puede importar el archivo se termina la accion
         if (!canImport(support)) {
-
-            System.out.println("No se pudo");
-
+            System.out.println("No se soporta la informacion");
             return false;
-
         }
-
-
-
-        JList list = (JList) support.getComponent();
-
+        // Obtenemos el componente que utiliza drag and drop
+        JList jList = (JList) support.getComponent();
         DefaultListModel model = new DefaultListModel();
-
-        list.setModel(model);
-
-        //List<File> dropppedFiles = null;
-
-        //try {
-
-            //dropppedFiles = (List<File>) support.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
-
-            //for (File file : dropppedFiles) {
-
-                //model.addElement(file.getName());
-
+        jList.setModel(model);
+        List<File> archivos = null;
+        try {
+            // Obtenemos los elmeentos arrastrados
+            archivos = (List<File>) support.getTransferable().getTransferData(
+                    DataFlavor.javaFileListFlavor);
+            // Los mandamos a su respectivo metodo para ser enviados
+            for (File file : archivos) {
+                model.addElement(file.getName());
+                model.removeElement(file.getName());
                 // Manda las carpetas recursivamente
+                if (file.isDirectory()) socketEnvio.enviarCarpetas(file, "");
+                else socketEnvio.enviarArchivo(file, ""); // Manda un solo archivo
+                model.removeElement(file.getName());
+                model.addElement(file.getName() + "(enviado)");
 
-                //if (file.isDirectory()) socketEnvio.enviarCarpetas(file, "");
-
-                //else socketEnvio.enviarArchivo(file, ""); // Manda un solo archivo
-
-            //}
-
-        //} catch (UnsupportedFlavorException | IOException e) {
-        //    e.printStackTrace();
-        //}
+            }
+        } catch (UnsupportedFlavorException | IOException e) {
+            e.printStackTrace();
+        }
         return true;
 
     }
