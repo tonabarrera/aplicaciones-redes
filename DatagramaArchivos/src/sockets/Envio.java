@@ -9,7 +9,6 @@ import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -111,7 +110,7 @@ public class Envio {
         byte[] datos = new byte[1024];
         int leidos;
         try {
-            while ((leidos = fis.leidos(datos)) != -1) {
+            while ((leidos = fis.read(datos)) != -1) {
                 sha1.update(datos, 0, leidos);
             }
         } catch (IOException e) {
