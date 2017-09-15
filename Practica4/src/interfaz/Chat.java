@@ -5,17 +5,25 @@
  */
 package interfaz;
 
+import sockets.Conectar;
+
+import java.io.IOException;
+
 /**
- *
  * @author tona
  */
 public class Chat extends javax.swing.JFrame {
-
+    Conectar conexion;
     /**
      * Creates new form Chat
      */
     public Chat() {
         initComponents();
+        try {
+            conexion = new Conectar();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -30,11 +38,11 @@ public class Chat extends javax.swing.JFrame {
         jScrollPane2 = new javax.swing.JScrollPane();
         panelMensajes = new javax.swing.JEditorPane();
         btnCargar = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
-        jButton4 = new javax.swing.JButton();
-        jButton5 = new javax.swing.JButton();
-        jButton6 = new javax.swing.JButton();
+        btnCaquita = new javax.swing.JButton();
+        btnFeliz = new javax.swing.JButton();
+        btnEnojado = new javax.swing.JButton();
+        btnCorazon = new javax.swing.JButton();
+        btnTriste = new javax.swing.JButton();
         btnEnviar = new javax.swing.JButton();
         jScrollPane3 = new javax.swing.JScrollPane();
         txtAreaMensaje = new javax.swing.JTextArea();
@@ -45,27 +53,30 @@ public class Chat extends javax.swing.JFrame {
         listUsuarios = new javax.swing.JList<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Super Chat Grupal");
+        setResizable(false);
 
-        jLabel1.setText("Super chat");
+        jLabel1.setText("Super chat grupal");
 
         jScrollPane2.setViewportView(panelMensajes);
 
         btnCargar.setText("Cargar Imagen");
-        btnCargar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCargarActionPerformed(evt);
-            }
-        });
+        btnCargar.addActionListener(this::btnCargarActionPerformed);
 
-        jButton2.setText("jButton2");
+        btnCaquita.setText("<:3");
+        btnCaquita.addActionListener(this::btnCaquitaActionPerformed);
 
-        jButton3.setText("jButton3");
+        btnFeliz.setText("=)");
+        btnFeliz.addActionListener(this::btnFelizActionPerformed);
 
-        jButton4.setText("jButton4");
+        btnEnojado.setText(">=|");
+        btnEnojado.addActionListener(this::btnEnojadoActionPerformed);
 
-        jButton5.setText("jButton5");
+        btnCorazon.setText("<3");
+        btnCorazon.addActionListener(this::btnCorazonActionPerformed);
 
-        jButton6.setText("jButton6");
+        btnTriste.setText("='(");
+        btnTriste.addActionListener(this::btnTristeActionPerformed);
 
         btnEnviar.setText("Enviar");
 
@@ -78,98 +89,129 @@ public class Chat extends javax.swing.JFrame {
         jLabel3.setText("Escribe un mensaje");
 
         btnVolver.setText("Volver al chat grupal");
-        btnVolver.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnVolverActionPerformed(evt);
-            }
-        });
+        btnVolver.addActionListener(this::btnVolverActionPerformed);
 
-        listUsuarios.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
-        });
         jScrollPane1.setViewportView(listUsuarios);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel1)
-                            .addComponent(jLabel3)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 291, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(btnCargar)
-                                    .addComponent(btnEnviar, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 402, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButton2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton3)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton4)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton5)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton6)
-                        .addGap(39, 39, 39)))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 176, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel2)
-                    .addComponent(btnVolver, javax.swing.GroupLayout.PREFERRED_SIZE, 176, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
-        );
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup().addContainerGap().addGroup(
+                                layout.createParallelGroup(
+                                        javax.swing.GroupLayout.Alignment.LEADING).addComponent(
+                                        jLabel1).addComponent(jLabel3).addGroup(
+                                        layout.createSequentialGroup().addComponent(jScrollPane3,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE, 291,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(
+                                                        javax.swing.LayoutStyle
+                                                                .ComponentPlacement.RELATED)
+                                                .addGroup(layout.createParallelGroup(
+                                                        javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addComponent(btnCargar)
+                                                        .addComponent(btnEnviar,
+                                                                javax.swing.GroupLayout
+                                                                        .PREFERRED_SIZE,
+                                                                107,
+                                                                javax.swing.GroupLayout
+                                                                        .PREFERRED_SIZE)))
+                                        .addComponent(jScrollPane2,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE, 402,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGroup(layout.createSequentialGroup().addComponent(
+                                                btnCaquita).addPreferredGap(
+                                                javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(btnFeliz).addPreferredGap(
+                                                        javax.swing.LayoutStyle
+                                                                .ComponentPlacement.RELATED)
+                                                .addComponent(btnEnojado).addPreferredGap(
+                                                        javax.swing.LayoutStyle
+                                                                .ComponentPlacement.RELATED)
+                                                .addComponent(btnCorazon).addPreferredGap(
+                                                        javax.swing.LayoutStyle
+                                                                .ComponentPlacement.RELATED)
+                                                .addComponent(btnTriste))).addPreferredGap(
+                                javax.swing.LayoutStyle.ComponentPlacement.RELATED, 24,
+                                Short.MAX_VALUE).addGroup(layout.createParallelGroup(
+                                javax.swing.GroupLayout.Alignment.LEADING).addComponent(
+                                jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING,
+                                javax.swing.GroupLayout.PREFERRED_SIZE, 176,
+                                javax.swing.GroupLayout.PREFERRED_SIZE).addComponent(jLabel2)
+                                .addComponent(btnVolver, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                        176, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addContainerGap()));
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(jLabel2))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 347, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jLabel3)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(378, 378, 378)
-                        .addComponent(btnCargar)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 13, Short.MAX_VALUE)
-                        .addComponent(btnEnviar))
-                    .addComponent(jScrollPane1))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnVolver)
-                    .addComponent(jButton6)
-                    .addComponent(jButton5)
-                    .addComponent(jButton4)
-                    .addComponent(jButton3)
-                    .addComponent(jButton2))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup().addContainerGap().addGroup(
+                                layout.createParallelGroup(
+                                        javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(jLabel1).addComponent(jLabel2))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(
+                                        javax.swing.GroupLayout.Alignment.LEADING, false).addGroup(
+                                        layout.createSequentialGroup().addComponent(jScrollPane2,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE, 347,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(
+                                                        javax.swing.LayoutStyle
+                                                                .ComponentPlacement.UNRELATED)
+                                                .addComponent(jLabel3).addPreferredGap(
+                                                javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(jScrollPane3,
+                                                        javax.swing.GroupLayout.PREFERRED_SIZE, 0,
+                                                        Short.MAX_VALUE))
+                                        .addGroup(layout.createSequentialGroup().addGap(378, 378,
+                                                378).addComponent(btnCargar).addPreferredGap(
+                                                javax.swing.LayoutStyle.ComponentPlacement.RELATED,
+                                                13, Short.MAX_VALUE).addComponent(btnEnviar))
+                                        .addComponent(jScrollPane1)).addPreferredGap(
+                                        javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(layout.createParallelGroup(
+                                        javax.swing.GroupLayout.Alignment.BASELINE).addComponent(
+                                        btnVolver).addComponent(btnTriste).addComponent(btnCorazon)
+                                        .addComponent(btnEnojado).addComponent(btnFeliz)
+                                        .addComponent(btnCaquita))
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE,
+                                        Short.MAX_VALUE)));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnCargarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCargarActionPerformed
+    private void btnCargarActionPerformed(
+            java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCargarActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_btnCargarActionPerformed
 
-    private void btnVolverActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVolverActionPerformed
+    private void btnVolverActionPerformed(
+            java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVolverActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_btnVolverActionPerformed
+
+    private void btnCorazonActionPerformed(
+            java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCorazonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnCorazonActionPerformed
+
+    private void btnCaquitaActionPerformed(
+            java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCaquitaActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnCaquitaActionPerformed
+
+    private void btnFelizActionPerformed(
+            java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFelizActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnFelizActionPerformed
+
+    private void btnEnojadoActionPerformed(
+            java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEnojadoActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnEnojadoActionPerformed
+
+    private void btnTristeActionPerformed(
+            java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTristeActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnTristeActionPerformed
 
     /**
      * @param args the command line arguments
@@ -177,44 +219,46 @@ public class Chat extends javax.swing.JFrame {
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and
+        feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
          */
         try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager
+                    .getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
                     break;
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(Chat.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Chat.class.getName())
+                    .log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(Chat.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Chat.class.getName())
+                    .log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(Chat.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Chat.class.getName())
+                    .log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(Chat.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Chat.class.getName())
+                    .log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new Chat().setVisible(true);
-            }
-        });
+        java.awt.EventQueue.invokeLater(() -> new Chat().setVisible(true));
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnCaquita;
     private javax.swing.JButton btnCargar;
+    private javax.swing.JButton btnCorazon;
+    private javax.swing.JButton btnEnojado;
     private javax.swing.JButton btnEnviar;
+    private javax.swing.JButton btnFeliz;
+    private javax.swing.JButton btnTriste;
     private javax.swing.JButton btnVolver;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton4;
-    private javax.swing.JButton jButton5;
-    private javax.swing.JButton jButton6;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
