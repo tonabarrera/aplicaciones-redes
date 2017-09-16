@@ -228,9 +228,12 @@ public class ClienteBuscaminas {
     }
 
     public static void destaparCero(Casilla casilla, Casilla conteo[][]) {
+        if(casilla.getIsShown()!=0){
+            return;
+        }
         if (casilla.getMinasAlrededor() == 0) {
             casilla.setIsShown((byte) 1);
-            //avisarCeros(casilla, conteo);
+            avisarCeros(casilla, conteo);
         }
     }
 }

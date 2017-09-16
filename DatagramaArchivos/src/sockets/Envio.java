@@ -18,7 +18,7 @@ import java.net.SocketException;
 public class Envio {
     private static final int TIMEOUT = 3000; // milisegundos
     private static final int INTENTOS_MAX = 5;
-    private static final int PUERTO = 5000;
+    private static final int PUERTO = 9980;
 
     public void enviarArchivo(File archivo, String destino) throws IOException {
         DatagramSocket socket = new DatagramSocket();
@@ -33,25 +33,25 @@ public class Envio {
         while (enviado < tamArchivo) {
             int intentos = 0;
             boolean respuesta = false;
-
             Archivo a = new Archivo(archivo.getName(), destino, archivo.length());
 
+        //baos: Regresa un objeto como un arreglo de bytes, ya que un socket datagrama solo envía arreglos de bytes
             ByteArrayOutputStream baos = new ByteArrayOutputStream(6400);
             ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(baos));
             oos.flush();
-
+        //Llenando el objeto a envíar
             byte[] b = new byte[4000]; // Maximo se van a leer 4000 bytes del archivo
             fraccion = dis.read(b); // bytes que se leyeron
             a.setDatos(b);
             a.setBytesEnviados(fraccion);
             System.out.println("Bytes leidos en el buffer de lectura: " + a.getBytesEnviados());
-
+        //Escribiendo el objeto en el Stream de Bytes
             oos.writeObject(a);
             oos.flush();
+        //Creando un arreglo de bytes[] con el Stream de Bytes que contiene a nuestro objeto    
             byte[] datos = baos.toByteArray();
             System.out.println("Tam paquete buffer: " + datos.length);
             DatagramPacket paqueteEnvio = new DatagramPacket(datos, datos.length, servidor, PUERTO);
-
             DatagramPacket paqueteConfirmacion = new DatagramPacket(new byte[datos.length],
                     datos.length);
 

@@ -13,7 +13,7 @@ import java.net.DatagramSocket;
  * @author tona
  */
 public class Servidor {
-    public static int PUERTO = 5000;
+    public static int PUERTO = 9980;
     private static final int TAM_PAQUETE = 6500;
     public static void main(String args[]) throws IOException, ClassNotFoundException {
         DatagramSocket socket = new DatagramSocket(PUERTO);
