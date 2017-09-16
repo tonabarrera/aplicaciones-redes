@@ -116,7 +116,10 @@ public class Ventana extends javax.swing.JFrame {
         if (archivos != null && archivos.length > 0) {
             for (File f : archivos) {
                 try {
-                    socketEnvio.enviarArchivo(f, "");
+                    if (f.isDirectory())
+                        socketEnvio.enviarCarpetas(f, "");
+                    else
+                        socketEnvio.enviarArchivo(f, "");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

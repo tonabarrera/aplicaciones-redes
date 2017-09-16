@@ -14,7 +14,7 @@ public class cliente_anuncia {
             InetAddress gpo = null;
             int pto = 8000;
             int pto1 = 8001;
-            MulticastSocket s = new MulticastSocket(pto);
+            MulticastSocket s = new MulticastSocket();
             s.setReuseAddress(true);
             //s.setTimeToLive(255);
             try{

@@ -24,7 +24,7 @@ public class anuncia {
             String anuncio="anuncio";
             byte[]b=anuncio.getBytes();
             for(;;){
-                DatagramPacket p = new DatagramPacket(b,b.length,gpo,pto1);
+                DatagramPacket p = new DatagramPacket(b,b.length,gpo,pto);
                 s.send(p);
                 try{
                     Thread.sleep(5000);
