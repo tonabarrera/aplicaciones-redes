@@ -80,8 +80,12 @@ public class Login extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnConectarseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConectarseActionPerformed
+    //GEN-FIRST:event_btnConectarseActionPerformed
+    private void btnConectarseActionPerformed(java.awt.event.ActionEvent evt) {
         // TODO add your handling code here:
+        String nickname = txtNickname.getText();
+        java.awt.EventQueue.invokeLater(() -> new Chat(nickname).setVisible(true));
+        this.dispose();
     }//GEN-LAST:event_btnConectarseActionPerformed
 
     /**
@@ -112,11 +116,7 @@ public class Login extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new Login().setVisible(true);
-            }
-        });
+        java.awt.EventQueue.invokeLater(() -> new Login().setVisible(true));
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

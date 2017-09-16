@@ -27,20 +27,30 @@ import javax.swing.text.html.StyleSheet;
  * @author tona
  */
 public class Chat extends javax.swing.JFrame {
-    private Element body = null;
+    private static Element body = null;
     private StyleSheet styleSheet;
-    private HTMLDocument doc;
+    private static HTMLDocument doc;
     private File imagen;
     private Servidor s;
     private Cliente c;
+    private String nickname;
+    private static DefaultListModel modelo;
 
     /**
      * Creates new form Chat
      */
     public Chat() {
         initComponents();
+        modelo = new DefaultListModel();
+        listUsuarios.setModel(modelo);
         obtenerBody();
         crearSocket();
+    }
+
+    public Chat(String nickname) {
+        this();
+        this.nickname = nickname;
+        c.enviarAnuncio(this.nickname);
     }
 
     /**
@@ -269,18 +279,17 @@ public class Chat extends javax.swing.JFrame {
         try {
             // TODO add your handling code here:
             Mensaje msj = new Mensaje();
-            msj.setUsuario("EL jojos");
+            msj.setUsuario(this.nickname);
             if (imagen != null) {
                 msj.setImagen(imagen.getAbsolutePath());
-                msj.setTieneImagen(true);
+                msj.setTipoMensaje(Mensaje.IMAGEN);
                 btnCargar.setText("Cargar Imagen");
                 imagen = null;
             }
             msj.setMensaje(obtenerMensaje());
-            agregarMensaje(msj);
             txtAreaMensaje.setText("");
             c.enviarMensaje(msj);
-        } catch (IOException | BadLocationException ex) {
+        } catch (IOException ex) {
             Logger.getLogger(Chat.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_btnEnviarActionPerformed
@@ -337,7 +346,7 @@ public class Chat extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
-    private javax.swing.JList<String> listUsuarios;
+    private static javax.swing.JList<String> listUsuarios;
     private javax.swing.JEditorPane panelMensajes;
     private javax.swing.JTextArea txtAreaMensaje;
     // End of variables declaration//GEN-END:variables
@@ -373,30 +382,28 @@ public class Chat extends javax.swing.JFrame {
             InetAddress grupo = InetAddress.getByName(dir);
             MulticastSocket multicastSocket = new MulticastSocket(puerto);
             multicastSocket.joinGroup(grupo);
-            //multicastSocket.setTimeToLive(255);
-            //multicastSocket.setReuseAddress(true);
+            multicastSocket.setTimeToLive(255);
+            multicastSocket.setReuseAddress(true);
 
-            //s = new Servidor(multicastSocket);
-            //c = new Cliente(multicastSocket, grupo);
+            s = new Servidor(multicastSocket);
+            c = new Cliente(multicastSocket, grupo);
 
-            DatagramPacket p = new DatagramPacket(new byte[200], 200);
-            multicastSocket.receive(p);
-            System.out.println(new String(p.getData(), 0, p.getLength()));
-
-            //new Thread(s).start();
+            new Thread(s).start();
 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void agregarMensaje(Mensaje msj) throws IOException, BadLocationException {
-        System.out.println("Hijos: " + body.getElementCount());
-
+    public static void agregarMensaje(Mensaje msj) throws IOException, BadLocationException {
         doc.insertBeforeEnd(body, msj.construirMensaje());
     }
 
     private void agregarEmoji(String msj) {
         txtAreaMensaje.setText(msj);
+    }
+
+    public static void agregarUsuarioLista(String usuario) {
+        modelo.addElement(usuario);
     }
 }

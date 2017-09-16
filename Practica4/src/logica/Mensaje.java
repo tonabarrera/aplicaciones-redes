@@ -1,12 +1,15 @@
 package logica;
 
-public class Mensaje {
-    private static final int ICONO = 0;
-    private static final int IMAGEN = 1;
+import java.io.Serializable;
+
+public class Mensaje implements Serializable{
+    public static final int ICONO = 0;
+    public static final int IMAGEN = 1;
+    public static final int ANUNCIO = 2;
     private String usuario;
     private String mensaje;
     private String imagen;
-    private boolean tieneImagen = false;
+    private int tipoMensaje = 0;
     private static final String ANGER = ClassLoader.getSystemResource("resources/anger.png").toString();
     private static final String HEART = ClassLoader.getSystemResource("resources/heart.png").toString();
     private static final String POOP = ClassLoader.getSystemResource("resources/poop.png").toString();
@@ -37,12 +40,12 @@ public class Mensaje {
         this.imagen = imagen;
     }
 
-    public boolean isTieneImagen() {
-        return tieneImagen;
+    public int getTipoMensaje() {
+        return tipoMensaje;
     }
 
-    public void setTieneImagen(boolean tieneImagen) {
-        this.tieneImagen = tieneImagen;
+    public void setTipoMensaje(int tipoMensaje) {
+        this.tipoMensaje = tipoMensaje;
     }
 
     @Override
@@ -51,30 +54,36 @@ public class Mensaje {
                 "usuario='" + usuario + '\'' +
                 ", mensaje='" + mensaje + '\'' +
                 ", imagen='" + imagen + '\'' +
-                ", tieneImagen=" + tieneImagen +
+                ", tipoMensaje=" + tipoMensaje +
                 '}';
     }
 
     public String construirMensaje() {
-        String msj = "<div><b>" + this.usuario + ":</b><span>";
-        String temporal = mensaje;
-        System.out.println();
+        String msj;
+        if (this.tipoMensaje == ANUNCIO) {
+            return this.mensaje;
+        } else {
+            msj = "<div><b>" + this.usuario + ":</b><span>";
+            String temporal = mensaje;
+            System.out.println();
 
-        temporal = temporal.replace(">=|", obtenerEtiquetaImagen(ANGER, ICONO));
-        temporal = temporal.replace("<3", obtenerEtiquetaImagen(HEART, ICONO));
-        temporal = temporal.replace(":poop:", obtenerEtiquetaImagen(POOP, ICONO));
-        temporal = temporal.replace("='(", obtenerEtiquetaImagen(SADNESS, ICONO));
-        temporal = temporal.replace("=)", obtenerEtiquetaImagen(SMILE, ICONO));
-        if (this.tieneImagen)
-            msj += temporal + "</span><p>" + obtenerEtiquetaImagen(this.imagen, IMAGEN) + "</p></div>";
-        else
-            msj += temporal + "</span></div>";
+            temporal = temporal.replace(">=|", obtenerEtiquetaImagen(ANGER, ICONO));
+            temporal = temporal.replace("<3", obtenerEtiquetaImagen(HEART, ICONO));
+            temporal = temporal.replace(":poop:", obtenerEtiquetaImagen(POOP, ICONO));
+            temporal = temporal.replace("='(", obtenerEtiquetaImagen(SADNESS, ICONO));
+            temporal = temporal.replace("=)", obtenerEtiquetaImagen(SMILE, ICONO));
+            if (this.tipoMensaje == IMAGEN)
+                msj += temporal + "</span><p>" + obtenerEtiquetaImagen(this.imagen, IMAGEN) + "</p></div>";
+            else
+                msj += temporal + "</span></div>";
+        }
+
         return msj;
     }
 
     private CharSequence obtenerEtiquetaImagen(String img, int tipo) {
         if (tipo == ICONO)
-            return "<img src=\"" + img +"\" width=\"15\" height=\"15\"/>";
+            return "<img src=\"" + img +"\" width=\"20\" height=\"20\"/>";
         else
             return "<img src=\"file:" + img +"\" width=\"250\" height=\"250\"/>";
     }
