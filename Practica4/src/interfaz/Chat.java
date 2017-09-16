@@ -5,25 +5,42 @@
  */
 package interfaz;
 
-import sockets.Conectar;
+import logica.Cliente;
+import logica.Mensaje;
+import logica.Servidor;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.InetAddress;
+import java.net.MulticastSocket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.*;
+import javax.swing.text.*;
+import javax.swing.text.html.HTML;
+import javax.swing.text.html.HTMLDocument;
+import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.StyleSheet;
 
 /**
  * @author tona
  */
 public class Chat extends javax.swing.JFrame {
-    Conectar conexion;
+    private Element body = null;
+    private StyleSheet styleSheet;
+    private HTMLDocument doc;
+    private File imagen;
+    private Servidor s;
+    private Cliente c;
+
     /**
      * Creates new form Chat
      */
     public Chat() {
         initComponents();
-        try {
-            conexion = new Conectar();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        obtenerBody();
+        crearSocket();
     }
 
     /**
@@ -58,30 +75,66 @@ public class Chat extends javax.swing.JFrame {
 
         jLabel1.setText("Super chat grupal");
 
+        panelMensajes.setEditable(false);
+        panelMensajes.setContentType("text/html"); // NOI18N
+        panelMensajes.setEditorKit(new HTMLEditorKit());
+        panelMensajes.setText("<!DOCTYPE html>\n<html>\n  <head>\n\n  </head>\n  <body></body>\n</html>\n");
+        panelMensajes.setAutoscrolls(false);
         jScrollPane2.setViewportView(panelMensajes);
 
         btnCargar.setText("Cargar Imagen");
-        btnCargar.addActionListener(this::btnCargarActionPerformed);
+        btnCargar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCargarActionPerformed(evt);
+            }
+        });
 
         btnCaquita.setText("<:3");
-        btnCaquita.addActionListener(this::btnCaquitaActionPerformed);
+        btnCaquita.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCaquitaActionPerformed(evt);
+            }
+        });
 
         btnFeliz.setText("=)");
-        btnFeliz.addActionListener(this::btnFelizActionPerformed);
+        btnFeliz.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnFelizActionPerformed(evt);
+            }
+        });
 
         btnEnojado.setText(">=|");
-        btnEnojado.addActionListener(this::btnEnojadoActionPerformed);
+        btnEnojado.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEnojadoActionPerformed(evt);
+            }
+        });
 
         btnCorazon.setText("<3");
-        btnCorazon.addActionListener(this::btnCorazonActionPerformed);
+        btnCorazon.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCorazonActionPerformed(evt);
+            }
+        });
 
         btnTriste.setText("='(");
-        btnTriste.addActionListener(this::btnTristeActionPerformed);
+        btnTriste.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnTristeActionPerformed(evt);
+            }
+        });
 
         btnEnviar.setText("Enviar");
+        btnEnviar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEnviarActionPerformed(evt);
+            }
+        });
 
-        txtAreaMensaje.setColumns(20);
+        txtAreaMensaje.setColumns(10);
+        txtAreaMensaje.setLineWrap(true);
         txtAreaMensaje.setRows(5);
+        txtAreaMensaje.setWrapStyleWord(true);
         jScrollPane3.setViewportView(txtAreaMensaje);
 
         jLabel2.setText("Usuarios conectados");
@@ -89,129 +142,148 @@ public class Chat extends javax.swing.JFrame {
         jLabel3.setText("Escribe un mensaje");
 
         btnVolver.setText("Volver al chat grupal");
-        btnVolver.addActionListener(this::btnVolverActionPerformed);
+        btnVolver.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnVolverActionPerformed(evt);
+            }
+        });
 
         jScrollPane1.setViewportView(listUsuarios);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup().addContainerGap().addGroup(
-                                layout.createParallelGroup(
-                                        javax.swing.GroupLayout.Alignment.LEADING).addComponent(
-                                        jLabel1).addComponent(jLabel3).addGroup(
-                                        layout.createSequentialGroup().addComponent(jScrollPane3,
-                                                javax.swing.GroupLayout.PREFERRED_SIZE, 291,
-                                                javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addPreferredGap(
-                                                        javax.swing.LayoutStyle
-                                                                .ComponentPlacement.RELATED)
-                                                .addGroup(layout.createParallelGroup(
-                                                        javax.swing.GroupLayout.Alignment.LEADING)
-                                                        .addComponent(btnCargar)
-                                                        .addComponent(btnEnviar,
-                                                                javax.swing.GroupLayout
-                                                                        .PREFERRED_SIZE,
-                                                                107,
-                                                                javax.swing.GroupLayout
-                                                                        .PREFERRED_SIZE)))
-                                        .addComponent(jScrollPane2,
-                                                javax.swing.GroupLayout.PREFERRED_SIZE, 402,
-                                                javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addGroup(layout.createSequentialGroup().addComponent(
-                                                btnCaquita).addPreferredGap(
-                                                javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(btnFeliz).addPreferredGap(
-                                                        javax.swing.LayoutStyle
-                                                                .ComponentPlacement.RELATED)
-                                                .addComponent(btnEnojado).addPreferredGap(
-                                                        javax.swing.LayoutStyle
-                                                                .ComponentPlacement.RELATED)
-                                                .addComponent(btnCorazon).addPreferredGap(
-                                                        javax.swing.LayoutStyle
-                                                                .ComponentPlacement.RELATED)
-                                                .addComponent(btnTriste))).addPreferredGap(
-                                javax.swing.LayoutStyle.ComponentPlacement.RELATED, 24,
-                                Short.MAX_VALUE).addGroup(layout.createParallelGroup(
-                                javax.swing.GroupLayout.Alignment.LEADING).addComponent(
-                                jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING,
-                                javax.swing.GroupLayout.PREFERRED_SIZE, 176,
-                                javax.swing.GroupLayout.PREFERRED_SIZE).addComponent(jLabel2)
-                                .addComponent(btnVolver, javax.swing.GroupLayout.PREFERRED_SIZE,
-                                        176, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addContainerGap()));
-        layout.setVerticalGroup(
-                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup().addContainerGap().addGroup(
-                                layout.createParallelGroup(
-                                        javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(jLabel1).addComponent(jLabel2))
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 291, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(btnCargar, javax.swing.GroupLayout.DEFAULT_SIZE, 157, Short.MAX_VALUE)
+                            .addComponent(btnEnviar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addComponent(jScrollPane2)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel1)
+                            .addComponent(jLabel3)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(btnCaquita)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(
-                                        javax.swing.GroupLayout.Alignment.LEADING, false).addGroup(
-                                        layout.createSequentialGroup().addComponent(jScrollPane2,
-                                                javax.swing.GroupLayout.PREFERRED_SIZE, 347,
-                                                javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addPreferredGap(
-                                                        javax.swing.LayoutStyle
-                                                                .ComponentPlacement.UNRELATED)
-                                                .addComponent(jLabel3).addPreferredGap(
-                                                javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(jScrollPane3,
-                                                        javax.swing.GroupLayout.PREFERRED_SIZE, 0,
-                                                        Short.MAX_VALUE))
-                                        .addGroup(layout.createSequentialGroup().addGap(378, 378,
-                                                378).addComponent(btnCargar).addPreferredGap(
-                                                javax.swing.LayoutStyle.ComponentPlacement.RELATED,
-                                                13, Short.MAX_VALUE).addComponent(btnEnviar))
-                                        .addComponent(jScrollPane1)).addPreferredGap(
-                                        javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(layout.createParallelGroup(
-                                        javax.swing.GroupLayout.Alignment.BASELINE).addComponent(
-                                        btnVolver).addComponent(btnTriste).addComponent(btnCorazon)
-                                        .addComponent(btnEnojado).addComponent(btnFeliz)
-                                        .addComponent(btnCaquita))
-                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE,
-                                        Short.MAX_VALUE)));
+                                .addComponent(btnFeliz)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnEnojado)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnCorazon)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnTriste)))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 176, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel2)
+                    .addComponent(btnVolver, javax.swing.GroupLayout.PREFERRED_SIZE, 176, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(jLabel2))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 347, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(384, 384, 384)
+                        .addComponent(btnCargar)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 13, Short.MAX_VALUE)
+                        .addComponent(btnEnviar))
+                    .addComponent(jScrollPane1))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnVolver)
+                    .addComponent(btnTriste)
+                    .addComponent(btnCorazon)
+                    .addComponent(btnEnojado)
+                    .addComponent(btnFeliz)
+                    .addComponent(btnCaquita))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnCargarActionPerformed(
-            java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCargarActionPerformed
+    private void btnCargarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCargarActionPerformed
         // TODO add your handling code here:
+        JFileChooser jfc = new JFileChooser();
+        jfc.setDialogTitle("Selecciona una imagen a enviar");
+        if (jfc.showDialog(this, "Seleccionar") == JFileChooser.APPROVE_OPTION) {
+            imagen = jfc.getSelectedFile();
+            JOptionPane.showMessageDialog(this, "Imagen lista para enviar");
+            btnCargar.setText("Imagen en espera");
+        }
     }//GEN-LAST:event_btnCargarActionPerformed
 
-    private void btnVolverActionPerformed(
-            java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVolverActionPerformed
+    private void btnVolverActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVolverActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_btnVolverActionPerformed
 
-    private void btnCorazonActionPerformed(
-            java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCorazonActionPerformed
+    private void btnCorazonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCorazonActionPerformed
         // TODO add your handling code here:
+        agregarEmoji(obtenerMensaje() + " <3 ");
     }//GEN-LAST:event_btnCorazonActionPerformed
 
-    private void btnCaquitaActionPerformed(
-            java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCaquitaActionPerformed
+    private void btnCaquitaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCaquitaActionPerformed
         // TODO add your handling code here:
+        agregarEmoji(obtenerMensaje() + " :poop: ");
     }//GEN-LAST:event_btnCaquitaActionPerformed
 
-    private void btnFelizActionPerformed(
-            java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFelizActionPerformed
+//GEN-FIRST:event_btnFelizActionPerformed
+    private void btnFelizActionPerformed(java.awt.event.ActionEvent evt) {
         // TODO add your handling code here:
+        agregarEmoji(obtenerMensaje() + " =) ");
     }//GEN-LAST:event_btnFelizActionPerformed
 
-    private void btnEnojadoActionPerformed(
-            java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEnojadoActionPerformed
+//GEN-FIRST:event_btnEnojadoActionPerformed
+    private void btnEnojadoActionPerformed(java.awt.event.ActionEvent evt) {
         // TODO add your handling code here:
+        agregarEmoji(obtenerMensaje() + " >=| ");
     }//GEN-LAST:event_btnEnojadoActionPerformed
 
-    private void btnTristeActionPerformed(
-            java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTristeActionPerformed
+//GEN-FIRST:event_btnTristeActionPerformed
+    private void btnTristeActionPerformed(java.awt.event.ActionEvent evt) {
         // TODO add your handling code here:
+        agregarEmoji(obtenerMensaje() + " ='( ");
     }//GEN-LAST:event_btnTristeActionPerformed
+
+//GEN-FIRST:event_btnEnviarActionPerformed
+    private void btnEnviarActionPerformed(java.awt.event.ActionEvent evt) {
+        try {
+            // TODO add your handling code here:
+            Mensaje msj = new Mensaje();
+            msj.setUsuario("EL jojos");
+            if (imagen != null) {
+                msj.setImagen(imagen.getAbsolutePath());
+                msj.setTieneImagen(true);
+                btnCargar.setText("Cargar Imagen");
+                imagen = null;
+            }
+            msj.setMensaje(obtenerMensaje());
+            agregarMensaje(msj);
+            txtAreaMensaje.setText("");
+            c.enviarMensaje(msj);
+        } catch (IOException | BadLocationException ex) {
+            Logger.getLogger(Chat.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_btnEnviarActionPerformed
 
     /**
      * @param args the command line arguments
@@ -269,4 +341,62 @@ public class Chat extends javax.swing.JFrame {
     private javax.swing.JEditorPane panelMensajes;
     private javax.swing.JTextArea txtAreaMensaje;
     // End of variables declaration//GEN-END:variables
+
+    private String obtenerMensaje() {
+        return txtAreaMensaje.getText();
+    }
+
+    private void obtenerBody() {
+        styleSheet = new StyleSheet();
+        HTMLEditorKit kit = (HTMLEditorKit) panelMensajes.getEditorKit();
+        styleSheet.addRule("div {max-width:295px; word-wrap:break-word; overflow: hidden; width:295px;}");
+        kit.setStyleSheet(styleSheet);
+        panelMensajes.setEditorKit(kit);
+        doc = (HTMLDocument) kit.createDefaultDocument();
+        panelMensajes.setDocument(doc);
+        Element[] roots = doc.getRootElements();
+
+        for (int i = 0; i < roots[0].getElementCount(); i++) {
+            Element element = roots[0].getElement(i);
+            System.out.println(element.getAttributes().getAttribute(StyleConstants.NameAttribute));
+            if (element.getAttributes().getAttribute(StyleConstants.NameAttribute) == HTML.Tag.BODY) {
+                body = element;
+                break;
+            }
+        }
+    }
+
+    private void crearSocket() {
+        String dir="235.1.1.1";
+        int puerto = 4445;
+        try {
+            InetAddress grupo = InetAddress.getByName(dir);
+            MulticastSocket multicastSocket = new MulticastSocket(puerto);
+            multicastSocket.joinGroup(grupo);
+            //multicastSocket.setTimeToLive(255);
+            //multicastSocket.setReuseAddress(true);
+
+            //s = new Servidor(multicastSocket);
+            //c = new Cliente(multicastSocket, grupo);
+
+            DatagramPacket p = new DatagramPacket(new byte[200], 200);
+            multicastSocket.receive(p);
+            System.out.println(new String(p.getData(), 0, p.getLength()));
+
+            //new Thread(s).start();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void agregarMensaje(Mensaje msj) throws IOException, BadLocationException {
+        System.out.println("Hijos: " + body.getElementCount());
+
+        doc.insertBeforeEnd(body, msj.construirMensaje());
+    }
+
+    private void agregarEmoji(String msj) {
+        txtAreaMensaje.setText(msj);
+    }
 }
