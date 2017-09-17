@@ -15,7 +15,7 @@ import java.util.Hashtable;
  * @author tona
  */
 public class Servidor {
-    public static int PUERTO = 5000;
+    public static int PUERTO = 9980;
     private static final int TAM_PAQUETE = 6500;
     private static Hashtable<String, DataOutputStream> tablini = new Hashtable<>();
     public static void main(String args[]) throws IOException, ClassNotFoundException {
