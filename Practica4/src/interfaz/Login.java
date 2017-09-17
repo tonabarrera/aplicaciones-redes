@@ -10,12 +10,15 @@ package interfaz;
  * @author tona
  */
 public class Login extends javax.swing.JFrame {
-
+    private static int dato = 5;
     /**
      * Creates new form Login
      */
     public Login() {
         initComponents();
+        System.out.println(dato);
+        dato = dato +100;
+        System.out.println(dato);
     }
 
     /**

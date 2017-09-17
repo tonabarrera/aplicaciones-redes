@@ -386,7 +386,7 @@ public class Chat extends javax.swing.JFrame {
             multicastSocket.setReuseAddress(true);
 
             s = new Servidor(multicastSocket);
-            c = new Cliente(multicastSocket, grupo);
+            c = new Cliente(multicastSocket, grupo, puerto);
 
             new Thread(s).start();
 

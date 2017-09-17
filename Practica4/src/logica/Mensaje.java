@@ -2,7 +2,7 @@ package logica;
 
 import java.io.Serializable;
 
-public class Mensaje implements Serializable{
+public class Mensaje implements Serializable {
     public static final int ICONO = 0;
     public static final int IMAGEN = 1;
     public static final int ANUNCIO = 2;
@@ -10,6 +10,8 @@ public class Mensaje implements Serializable{
     private String mensaje;
     private String imagen;
     private int tipoMensaje = 0;
+
+    // Esto se deberia de cambiar por la direccion del localhost
     private static final String ANGER = ClassLoader.getSystemResource("resources/anger.png").toString();
     private static final String HEART = ClassLoader.getSystemResource("resources/heart.png").toString();
     private static final String POOP = ClassLoader.getSystemResource("resources/poop.png").toString();
@@ -65,7 +67,6 @@ public class Mensaje implements Serializable{
         } else {
             msj = "<div><b>" + this.usuario + ":</b><span>";
             String temporal = mensaje;
-            System.out.println();
 
             temporal = temporal.replace(">=|", obtenerEtiquetaImagen(ANGER, ICONO));
             temporal = temporal.replace("<3", obtenerEtiquetaImagen(HEART, ICONO));
@@ -83,8 +84,8 @@ public class Mensaje implements Serializable{
 
     private CharSequence obtenerEtiquetaImagen(String img, int tipo) {
         if (tipo == ICONO)
-            return "<img src=\"" + img +"\" width=\"20\" height=\"20\"/>";
+            return "<img src=\"" + img + "\" width=\"20\" height=\"20\"/>";
         else
-            return "<img src=\"file:" + img +"\" width=\"250\" height=\"250\"/>";
+            return "<img src=\"file:" + img + "\" width=\"250\" height=\"250\"/>";
     }
 }
