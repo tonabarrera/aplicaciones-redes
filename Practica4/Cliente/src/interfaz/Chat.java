@@ -5,34 +5,34 @@
  */
 package interfaz;
 
-import logica.Cliente;
+import logica.Enviar;
 import logica.Mensaje;
-import logica.Servidor;
+import logica.MulticastConstantes;
+import logica.Recibir;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.InetAddress;
-import java.net.MulticastSocket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.*;
-import javax.swing.text.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Element;
+import javax.swing.text.StyleConstants;
 import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
+import java.io.File;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.MulticastSocket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author tona
  */
-public class Chat extends javax.swing.JFrame {
+public class Chat extends javax.swing.JFrame implements MulticastConstantes{
     private static Element body = null;
-    private StyleSheet styleSheet;
     private static HTMLDocument doc;
     private File imagen;
-    private Servidor s;
-    private Cliente c;
+    private Enviar enviar;
     private String nickname;
     private static DefaultListModel modelo;
 
@@ -50,7 +50,7 @@ public class Chat extends javax.swing.JFrame {
     public Chat(String nickname) {
         this();
         this.nickname = nickname;
-        c.enviarAnuncio(this.nickname);
+        enviar.enviarAnuncio(this.nickname);
     }
 
     /**
@@ -163,75 +163,76 @@ public class Chat extends javax.swing.JFrame {
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 291, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(btnCargar, javax.swing.GroupLayout.DEFAULT_SIZE, 157, Short.MAX_VALUE)
-                            .addComponent(btnEnviar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                    .addComponent(jScrollPane2)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel1)
-                            .addComponent(jLabel3)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(btnCaquita)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnFeliz)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnEnojado)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnCorazon)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnTriste)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 176, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel2)
-                    .addComponent(btnVolver, javax.swing.GroupLayout.PREFERRED_SIZE, 176, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 291, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addComponent(btnCargar, javax.swing.GroupLayout.DEFAULT_SIZE, 157, Short.MAX_VALUE)
+                                                        .addComponent(btnEnviar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                                        .addComponent(jScrollPane2)
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addComponent(jLabel1)
+                                                        .addComponent(jLabel3)
+                                                        .addGroup(layout.createSequentialGroup()
+                                                                .addComponent(btnCaquita)
+                                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                .addComponent(btnFeliz)
+                                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                .addComponent(btnEnojado)
+                                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                .addComponent(btnCorazon)
+                                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                .addComponent(btnTriste)))
+                                                .addGap(0, 0, Short.MAX_VALUE)))
+                                .addGap(18, 18, 18)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 176, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(jLabel2)
+                                        .addComponent(btnVolver, javax.swing.GroupLayout.PREFERRED_SIZE, 176, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addContainerGap())
         );
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(jLabel2))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 347, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jLabel3)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(384, 384, 384)
-                        .addComponent(btnCargar)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 13, Short.MAX_VALUE)
-                        .addComponent(btnEnviar))
-                    .addComponent(jScrollPane1))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnVolver)
-                    .addComponent(btnTriste)
-                    .addComponent(btnCorazon)
-                    .addComponent(btnEnojado)
-                    .addComponent(btnFeliz)
-                    .addComponent(btnCaquita))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(jLabel1)
+                                        .addComponent(jLabel2))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 347, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addComponent(jLabel3)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addGap(384, 384, 384)
+                                                .addComponent(btnCargar)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 13, Short.MAX_VALUE)
+                                                .addComponent(btnEnviar))
+                                        .addComponent(jScrollPane1))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(btnVolver)
+                                        .addComponent(btnTriste)
+                                        .addComponent(btnCorazon)
+                                        .addComponent(btnEnojado)
+                                        .addComponent(btnFeliz)
+                                        .addComponent(btnCaquita))
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnCargarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCargarActionPerformed
+    //GEN-FIRST:event_btnCargarActionPerformed
+    private void btnCargarActionPerformed(java.awt.event.ActionEvent evt) {
         // TODO add your handling code here:
         JFileChooser jfc = new JFileChooser();
         jfc.setDialogTitle("Selecciona una imagen a enviar");
@@ -256,25 +257,25 @@ public class Chat extends javax.swing.JFrame {
         agregarEmoji(obtenerMensaje() + " :poop: ");
     }//GEN-LAST:event_btnCaquitaActionPerformed
 
-//GEN-FIRST:event_btnFelizActionPerformed
+    //GEN-FIRST:event_btnFelizActionPerformed
     private void btnFelizActionPerformed(java.awt.event.ActionEvent evt) {
         // TODO add your handling code here:
         agregarEmoji(obtenerMensaje() + " =) ");
     }//GEN-LAST:event_btnFelizActionPerformed
 
-//GEN-FIRST:event_btnEnojadoActionPerformed
+    //GEN-FIRST:event_btnEnojadoActionPerformed
     private void btnEnojadoActionPerformed(java.awt.event.ActionEvent evt) {
         // TODO add your handling code here:
         agregarEmoji(obtenerMensaje() + " >=| ");
     }//GEN-LAST:event_btnEnojadoActionPerformed
 
-//GEN-FIRST:event_btnTristeActionPerformed
+    //GEN-FIRST:event_btnTristeActionPerformed
     private void btnTristeActionPerformed(java.awt.event.ActionEvent evt) {
         // TODO add your handling code here:
         agregarEmoji(obtenerMensaje() + " ='( ");
     }//GEN-LAST:event_btnTristeActionPerformed
 
-//GEN-FIRST:event_btnEnviarActionPerformed
+    //GEN-FIRST:event_btnEnviarActionPerformed
     private void btnEnviarActionPerformed(java.awt.event.ActionEvent evt) {
         try {
             // TODO add your handling code here:
@@ -288,7 +289,7 @@ public class Chat extends javax.swing.JFrame {
             }
             msj.setMensaje(obtenerMensaje());
             txtAreaMensaje.setText("");
-            c.enviarMensaje(msj);
+            enviar.enviarMensaje(msj);
         } catch (IOException ex) {
             Logger.getLogger(Chat.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -356,7 +357,7 @@ public class Chat extends javax.swing.JFrame {
     }
 
     private void obtenerBody() {
-        styleSheet = new StyleSheet();
+        StyleSheet styleSheet = new StyleSheet();
         HTMLEditorKit kit = (HTMLEditorKit) panelMensajes.getEditorKit();
         styleSheet.addRule("div {max-width:295px; word-wrap:break-word; overflow: hidden; width:295px;}");
         kit.setStyleSheet(styleSheet);
@@ -376,19 +377,16 @@ public class Chat extends javax.swing.JFrame {
     }
 
     private void crearSocket() {
-        String dir="235.1.1.1";
-        int puerto = 4445;
         try {
-            InetAddress grupo = InetAddress.getByName(dir);
-            MulticastSocket multicastSocket = new MulticastSocket(puerto);
+            InetAddress grupo = InetAddress.getByName(DIRECCION);
+            MulticastSocket multicastSocket = new MulticastSocket(PUERTO);
             multicastSocket.joinGroup(grupo);
-            multicastSocket.setTimeToLive(255);
             multicastSocket.setReuseAddress(true);
 
-            s = new Servidor(multicastSocket);
-            c = new Cliente(multicastSocket, grupo, puerto);
+            Recibir recibir = new Recibir(multicastSocket);
+            enviar = new Enviar(multicastSocket, grupo, PUERTO);
 
-            new Thread(s).start();
+            new Thread(recibir).start();
 
         } catch (IOException e) {
             e.printStackTrace();

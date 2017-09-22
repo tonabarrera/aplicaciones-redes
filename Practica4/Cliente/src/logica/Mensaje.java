@@ -1,15 +1,18 @@
 package logica;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 public class Mensaje implements Serializable {
     public static final int ICONO = 0;
     public static final int IMAGEN = 1;
     public static final int ANUNCIO = 2;
+    private String destinatario;
     private String usuario;
     private String mensaje;
     private String imagen;
     private int tipoMensaje = 0;
+    private ArrayList<String> conectados;
 
     // Esto se deberia de cambiar por la direccion del localhost
     private static final String ANGER = ClassLoader.getSystemResource("resources/anger.png").toString();
@@ -50,10 +53,27 @@ public class Mensaje implements Serializable {
         this.tipoMensaje = tipoMensaje;
     }
 
+    public String getDestinatario() {
+        return destinatario;
+    }
+
+    public void setDestinatario(String destinatario) {
+        this.destinatario = destinatario;
+    }
+
+    public ArrayList<String> getConectados() {
+        return conectados;
+    }
+
+    public void setConectados(ArrayList<String> conectados) {
+        this.conectados = conectados;
+    }
+
     @Override
     public String toString() {
         return "Mensaje{" +
                 "usuario='" + usuario + '\'' +
+                "destinatario='" + destinatario + '\'' +
                 ", mensaje='" + mensaje + '\'' +
                 ", imagen='" + imagen + '\'' +
                 ", tipoMensaje=" + tipoMensaje +

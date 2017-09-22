@@ -8,25 +8,25 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.util.Random;
+import static logica.MulticastConstantes.TAM_BUFFER;
 
 /**
  * @author tona created on 14/09/2017 for Practica4.
  */
 
-public class Cliente {
+public class Enviar implements MulticastConstantes{
     private MulticastSocket socket;
     private InetAddress grupo;
-    private static final int TAM_BUFFER = 6400;
     private int puerto;
     private Random random;
 
-    public Cliente(MulticastSocket multicastSocket, InetAddress grupo, int puerto) {
+    public Enviar(MulticastSocket multicastSocket, InetAddress grupo, int puerto) {
         this.socket = multicastSocket;
         this.grupo = grupo;
         this.puerto = puerto;
         this.random = new Random();
     }
-
+    
     public void enviarMensaje(Mensaje msj) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream(TAM_BUFFER);
         ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(baos));
@@ -51,7 +51,7 @@ public class Cliente {
 
         System.out.println(color);
         anuncio.setUsuario(nickname);
-        nickname = "<div style=\"color:#"+color+"\"><b>" + nickname + "</b> se ha conectado</div>";
+        nickname = "<div style=\"color:#" + color + "\"><b>" + nickname + "</b> se ha conectado</div>";
         anuncio.setMensaje(nickname);
         try {
             enviarMensaje(anuncio);
