@@ -1,25 +1,30 @@
 package logica;
 
 import java.io.Serializable;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Mensaje implements Serializable {
     public static final int ICONO = 0;
     public static final int IMAGEN = 1;
     public static final int ANUNCIO = 2;
+    public static final int LISTA_CONECTADOS = 3;
     private String destinatario;
     private String usuario;
     private String mensaje;
     private String imagen;
     private int tipoMensaje = 0;
     private ArrayList<String> conectados;
-
+    private byte[] datos;
+    private int enviados;
+    private long imgTam;
     // Esto se deberia de cambiar por la direccion del localhost
-    private static final String ANGER = ClassLoader.getSystemResource("resources/anger.png").toString();
-    private static final String HEART = ClassLoader.getSystemResource("resources/heart.png").toString();
-    private static final String POOP = ClassLoader.getSystemResource("resources/poop.png").toString();
-    private static final String SADNESS = ClassLoader.getSystemResource("resources/sadness.png").toString();
-    private static final String SMILE = ClassLoader.getSystemResource("resources/smile.png").toString();
+    public static final URL ANGER = ClassLoader.getSystemResource("resources/anger.png");
+    public static final URL HEART = ClassLoader.getSystemResource("resources/heart.png");
+    public static final URL POOP = ClassLoader.getSystemResource("resources/poop.png");
+    public static final URL SADNESS = ClassLoader.getSystemResource("resources/sadness.png");
+    public static final URL SMILE = ClassLoader.getSystemResource("resources/smile.png");
 
     public String getUsuario() {
         return usuario;
@@ -69,14 +74,41 @@ public class Mensaje implements Serializable {
         this.conectados = conectados;
     }
 
+    public byte[] getDatos() {
+        return datos;
+    }
+
+    public void setDatos(byte[] datos) {
+        this.datos = datos;
+    }
+
+    public int getEnviados() {
+        return enviados;
+    }
+
+    public void setEnviados(int enviados) {
+        this.enviados = enviados;
+    }
+
+    public long getImgTam() {
+        return imgTam;
+    }
+
+    public void setImgTam(long imgTam) {
+        this.imgTam = imgTam;
+    }
+
     @Override
     public String toString() {
         return "Mensaje{" +
-                "usuario='" + usuario + '\'' +
                 "destinatario='" + destinatario + '\'' +
+                ", usuario='" + usuario + '\'' +
                 ", mensaje='" + mensaje + '\'' +
                 ", imagen='" + imagen + '\'' +
                 ", tipoMensaje=" + tipoMensaje +
+                ", conectados=" + conectados +
+                ", enviados=" + enviados +
+                ", imgTam=" + imgTam +
                 '}';
     }
 
@@ -88,11 +120,11 @@ public class Mensaje implements Serializable {
             msj = "<div><b>" + this.usuario + ":</b><span>";
             String temporal = mensaje;
 
-            temporal = temporal.replace(">=|", obtenerEtiquetaImagen(ANGER, ICONO));
-            temporal = temporal.replace("<3", obtenerEtiquetaImagen(HEART, ICONO));
-            temporal = temporal.replace(":poop:", obtenerEtiquetaImagen(POOP, ICONO));
-            temporal = temporal.replace("='(", obtenerEtiquetaImagen(SADNESS, ICONO));
-            temporal = temporal.replace("=)", obtenerEtiquetaImagen(SMILE, ICONO));
+            temporal = temporal.replace(">=|", obtenerEtiquetaImagen(ANGER.toString(), ICONO));
+            temporal = temporal.replace("<3", obtenerEtiquetaImagen(HEART.toString(), ICONO));
+            temporal = temporal.replace(":poop:", obtenerEtiquetaImagen(POOP.toString(), ICONO));
+            temporal = temporal.replace("='(", obtenerEtiquetaImagen(SADNESS.toString(), ICONO));
+            temporal = temporal.replace("=)", obtenerEtiquetaImagen(SMILE.toString(), ICONO));
             if (this.tipoMensaje == IMAGEN)
                 msj += temporal + "</span><p>" + obtenerEtiquetaImagen(this.imagen, IMAGEN) + "</p></div>";
             else

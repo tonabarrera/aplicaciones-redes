@@ -12,7 +12,7 @@ import java.net.MulticastSocket;
 import java.util.ArrayList;
 
 public class Servidor implements MulticastConstantes {
-    private static ArrayList<String> conectados;
+    private static ArrayList<String> conectados = new ArrayList<>();
     private static InetAddress grupo;
     private static MulticastSocket multicastSocket;
     public static void main(String[] args) throws ClassNotFoundException {
@@ -29,9 +29,13 @@ public class Servidor implements MulticastConstantes {
                 Mensaje msj =  recuperarMensaje(paquete);
                 System.out.println(msj.toString());
                 if (msj.getTipoMensaje() == Mensaje.ANUNCIO){
+                    System.out.println("Anuncio recibido...");
                     conectados.add(msj.getUsuario());
                     Mensaje respuesta = new Mensaje();
                     respuesta.setConectados(conectados);
+                    respuesta.setTipoMensaje(Mensaje.LISTA_CONECTADOS);
+                    enviarMensaje(respuesta);
+                    System.out.println("Lista de conectados enviados");
                 }
                 paquete.setLength(TAM_BUFFER);
             }
@@ -52,7 +56,7 @@ public class Servidor implements MulticastConstantes {
         return msj;
     }
 
-    protected void enviarMensaje(Mensaje msj) throws IOException {
+    protected static void enviarMensaje(Mensaje msj) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream(TAM_BUFFER);
         ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(baos));
         oos.flush();

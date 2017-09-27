@@ -1,9 +1,6 @@
 package logica;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
@@ -58,5 +55,27 @@ public class Enviar implements MulticastConstantes{
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void enviarImagen(File imagen, Mensaje msj) throws IOException {
+        long tam = imagen.length();
+        long leidos = 0;
+        int n;
+        DataInputStream dis = new DataInputStream(new FileInputStream(imagen.getAbsolutePath()));
+        while(leidos < tam) {
+            Mensaje mensaje = new Mensaje();
+            mensaje.setTipoMensaje(Mensaje.IMAGEN);
+            mensaje.setMensaje(msj.getMensaje());
+            mensaje.setImagen(imagen.getName());
+            mensaje.setImgTam(tam);
+            mensaje.setUsuario(msj.getUsuario());
+            byte[] b = new byte[5000];
+            n = dis.read(b);
+            mensaje.setDatos(b);
+            mensaje.setEnviados(n);
+            enviarMensaje(mensaje);
+            leidos += n;
+        }
+        dis.close();
     }
 }
