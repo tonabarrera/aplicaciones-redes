@@ -7,6 +7,8 @@ import java.io.*;
 import javax.swing.text.BadLocationException;
 import java.net.DatagramPacket;
 import java.net.MulticastSocket;
+import java.security.NoSuchAlgorithmException;
+import java.util.Objects;
 
 /**
  * @author tona created on 14/09/2017 for Practica4.
@@ -41,7 +43,8 @@ public class Recibir implements Runnable, MulticastConstantes{
                     fos.close();
                     File f = new File(archivo);
                     System.out.println(f.length() + " " + mensaje.getImgTam());
-                    if (f.length() == mensaje.getImgTam()) {
+                    String clave = Enviar.obtenerClaveHash(f);
+                    if (clave.equals(mensaje.getClave())) {
                         System.out.println("Mostar imagen");
                         mensaje.setImagen(f.getAbsolutePath());
                         Chat.agregarMensaje(mensaje);
@@ -50,7 +53,7 @@ public class Recibir implements Runnable, MulticastConstantes{
                 }else
                     Chat.agregarMensaje(mensaje);
 
-            } catch (IOException | ClassNotFoundException | BadLocationException e) {
+            } catch (IOException | ClassNotFoundException | BadLocationException | NoSuchAlgorithmException e) {
                 e.printStackTrace();
             }
             p.setLength(TAM_BUFFER);
@@ -64,7 +67,7 @@ public class Recibir implements Runnable, MulticastConstantes{
         ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(paquete.getData()));
         Mensaje msj = (Mensaje) ois.readObject();
         System.out.println(msj.toString());
-        System.out.println("******************************************************");
+        System.out.println("**********************************************************************************");
         ois.close();
         return msj;
     }

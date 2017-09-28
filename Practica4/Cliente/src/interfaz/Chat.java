@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,8 +37,9 @@ public class Chat extends javax.swing.JFrame implements MulticastConstantes{
     private static HTMLDocument doc;
     private File imagen;
     private Enviar enviar;
-    private String nickname;
+    private static String nickname;
     private static DefaultListModel modelo;
+    private static String dest;
 
     /**
      * Creates new form Chat
@@ -210,6 +212,11 @@ public class Chat extends javax.swing.JFrame implements MulticastConstantes{
             }
         });
 
+        listUsuarios.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                listUsuariosMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(listUsuarios);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -295,16 +302,21 @@ public class Chat extends javax.swing.JFrame implements MulticastConstantes{
         }
     }//GEN-LAST:event_btnCargarActionPerformed
 
-    private void btnVolverActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVolverActionPerformed
+    //GEN-FIRST:event_btnVolverActionPerformed
+    private void btnVolverActionPerformed(java.awt.event.ActionEvent evt) {
         // TODO add your handling code here:
+        listUsuarios.clearSelection();
+        dest = null;
     }//GEN-LAST:event_btnVolverActionPerformed
 
-    private void btnCorazonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCorazonActionPerformed
+    //GEN-FIRST:event_btnCorazonActionPerformed
+    private void btnCorazonActionPerformed(java.awt.event.ActionEvent evt) {
         // TODO add your handling code here:
         agregarEmoji(obtenerMensaje() + " <3 ");
     }//GEN-LAST:event_btnCorazonActionPerformed
 
-    private void btnCaquitaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCaquitaActionPerformed
+    //GEN-FIRST:event_btnCaquitaActionPerformed
+    private void btnCaquitaActionPerformed(java.awt.event.ActionEvent evt) {
         // TODO add your handling code here:
         agregarEmoji(obtenerMensaje() + " :poop: ");
     }//GEN-LAST:event_btnCaquitaActionPerformed
@@ -334,6 +346,8 @@ public class Chat extends javax.swing.JFrame implements MulticastConstantes{
             Mensaje msj = new Mensaje();
             msj.setUsuario(this.nickname);
             msj.setMensaje(obtenerMensaje());
+            if (dest != null)
+                msj.setDestinatario(dest);
             if (imagen != null) {
                 msj.setTipoMensaje(Mensaje.IMAGEN);
                 btnCargar.setText("Cargar Imagen");
@@ -347,6 +361,17 @@ public class Chat extends javax.swing.JFrame implements MulticastConstantes{
             Logger.getLogger(Chat.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_btnEnviarActionPerformed
+
+    //GEN-FIRST:event_listUsuariosMouseClicked
+    private void listUsuariosMouseClicked(java.awt.event.MouseEvent evt) {
+        // TODO add your handling code here:
+        JList jlist = (JList) evt.getSource();
+        if (evt.getClickCount() == 1) {
+            int index = jlist.locationToIndex(evt.getPoint());
+            System.out.println("Destinatario: "+ modelo.get(index));
+            dest = (String) modelo.get(index);
+        }
+    }//GEN-LAST:event_listUsuariosMouseClicked
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCaquita;
@@ -410,7 +435,8 @@ public class Chat extends javax.swing.JFrame implements MulticastConstantes{
     }
 
     public static void agregarMensaje(Mensaje msj) throws IOException, BadLocationException {
-        doc.insertBeforeEnd(body, msj.construirMensaje());
+        if (Objects.equals(msj.getDestinatario(), dest) || msj.getDestinatario() == null || Objects.equals(msj.getDestinatario(), nickname) )
+            doc.insertBeforeEnd(body, msj.construirMensaje());
     }
 
     private void agregarEmoji(String msj) {

@@ -35,7 +35,6 @@ public class Enviar implements MulticastConstantes{
         byte[] datos = baos.toByteArray();
         DatagramPacket paquete = new DatagramPacket(datos, datos.length, grupo, puerto);
         socket.send(paquete);
-        System.out.println("Enviando");
         oos.close();
         baos.close();
     }
@@ -62,6 +61,12 @@ public class Enviar implements MulticastConstantes{
     public void enviarImagen(File imagen, Mensaje msj) throws IOException {
         long tam = imagen.length();
         long leidos = 0;
+        String clave = "";
+        try {
+            clave = obtenerClaveHash(imagen);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
         int n;
         DataInputStream dis = new DataInputStream(new FileInputStream(imagen.getAbsolutePath()));
         while(leidos < tam) {
@@ -69,9 +74,10 @@ public class Enviar implements MulticastConstantes{
             mensaje.setTipoMensaje(Mensaje.IMAGEN);
             mensaje.setMensaje(msj.getMensaje());
             mensaje.setImagen(imagen.getName());
+            mensaje.setClave(clave);
             mensaje.setImgTam(tam);
             mensaje.setUsuario(msj.getUsuario());
-            byte[] b = new byte[5000];
+            byte[] b = new byte[7000];
             n = dis.read(b);
             mensaje.setDatos(b);
             mensaje.setEnviados(n);
@@ -81,7 +87,7 @@ public class Enviar implements MulticastConstantes{
         dis.close();
     }
 
-    public String obtenerClaveHash(File archivo) throws NoSuchAlgorithmException, IOException {
+    static String obtenerClaveHash(File archivo) throws NoSuchAlgorithmException, IOException {
         MessageDigest sha1 = MessageDigest.getInstance("SHA1");
         FileInputStream fis = new FileInputStream(archivo.getAbsolutePath());
         byte[] datos = new byte[1024];

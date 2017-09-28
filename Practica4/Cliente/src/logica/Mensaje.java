@@ -12,6 +12,7 @@ public class Mensaje implements Serializable {
     public static final int LISTA_CONECTADOS = 3;
     private String destinatario;
     private String usuario;
+    private String clave;
     private String mensaje;
     private String imagen;
     private int tipoMensaje = 0;
@@ -98,12 +99,21 @@ public class Mensaje implements Serializable {
         this.imgTam = imgTam;
     }
 
+    public String getClave() {
+        return clave;
+    }
+
+    public void setClave(String clave) {
+        this.clave = clave;
+    }
+
     @Override
     public String toString() {
         return "Mensaje{" +
                 "destinatario='" + destinatario + '\'' +
                 ", usuario='" + usuario + '\'' +
-                ", mensaje='" + mensaje + '\'' +
+                ", clave='" + clave + '\'' +
+                "\nmensaje='" + mensaje + '\'' +
                 ", imagen='" + imagen + '\'' +
                 ", tipoMensaje=" + tipoMensaje +
                 ", conectados=" + conectados +
@@ -117,7 +127,8 @@ public class Mensaje implements Serializable {
         if (this.tipoMensaje == ANUNCIO) {
             return this.mensaje;
         } else {
-            msj = "<div><b>" + this.usuario + ":</b><span>";
+            if (destinatario == null) msj = "<div><b>" + this.usuario + ":</b><span>";
+            else msj = "<div><b>" + this.usuario + "</b> para <b>" + this.destinatario + ":</b><span>";
             String temporal = mensaje;
 
             temporal = temporal.replace(">=|", obtenerEtiquetaImagen(ANGER.toString(), ICONO));
