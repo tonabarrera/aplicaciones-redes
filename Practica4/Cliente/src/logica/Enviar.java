@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 import static logica.MulticastConstantes.TAM_BUFFER;
 
@@ -77,5 +79,27 @@ public class Enviar implements MulticastConstantes{
             leidos += n;
         }
         dis.close();
+    }
+
+    public String obtenerClaveHash(File archivo) throws NoSuchAlgorithmException, IOException {
+        MessageDigest sha1 = MessageDigest.getInstance("SHA1");
+        FileInputStream fis = new FileInputStream(archivo.getAbsolutePath());
+        byte[] datos = new byte[1024];
+        int leidos;
+        try {
+            while ((leidos = fis.read(datos)) != -1) {
+                sha1.update(datos, 0, leidos);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        byte[] hashBytes = sha1.digest();
+
+        StringBuilder sb = new StringBuilder();
+        for (byte hashByte : hashBytes) {
+            sb.append(Integer.toString((hashByte & 0xff) + 0x100, 16).substring(1));
+        }
+        fis.close();
+        return sb.toString();
     }
 }
