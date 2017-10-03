@@ -6,15 +6,13 @@
 package interfaz;
 
 /**
- *
  * @author tona
  */
 public class Login extends javax.swing.JFrame {
-
     /**
      * Creates new form Login
      */
-    public Login() {
+    private Login() {
         initComponents();
     }
 
@@ -32,6 +30,7 @@ public class Login extends javax.swing.JFrame {
         btnConectarse = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Super Chat");
 
         jLabel1.setText("Inicio de Sesión");
 
@@ -80,7 +79,7 @@ public class Login extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    //GEN-FIRST:event_btnConectarseActionPerformed
+//GEN-FIRST:event_btnConectarseActionPerformed
     private void btnConectarseActionPerformed(java.awt.event.ActionEvent evt) {
         // TODO add your handling code here:
         String nickname = txtNickname.getText();

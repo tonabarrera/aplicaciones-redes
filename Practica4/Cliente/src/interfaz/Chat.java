@@ -5,36 +5,41 @@
  */
 package interfaz;
 
-import logica.Cliente;
+import logica.Enviar;
 import logica.Mensaje;
-import logica.Servidor;
+import logica.MulticastConstantes;
+import logica.Recibir;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.InetAddress;
-import java.net.MulticastSocket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.text.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Element;
+import javax.swing.text.StyleConstants;
 import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.MulticastSocket;
+import java.util.ArrayList;
+import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author tona
  */
-public class Chat extends javax.swing.JFrame {
+public class Chat extends javax.swing.JFrame implements MulticastConstantes{
     private static Element body = null;
-    private StyleSheet styleSheet;
     private static HTMLDocument doc;
     private File imagen;
-    private Servidor s;
-    private Cliente c;
-    private String nickname;
+    private Enviar enviar;
+    private static String nickname;
     private static DefaultListModel modelo;
+    private static String dest;
 
     /**
      * Creates new form Chat
@@ -44,13 +49,46 @@ public class Chat extends javax.swing.JFrame {
         modelo = new DefaultListModel();
         listUsuarios.setModel(modelo);
         obtenerBody();
-        crearSocket();
     }
 
     public Chat(String nickname) {
         this();
         this.nickname = nickname;
-        c.enviarAnuncio(this.nickname);
+        crearSocket();
+        enviar.enviarAnuncio(this.nickname);
+        try {
+            ponerIconos();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void ponerIconos() throws IOException {
+        int dimension = btnCaquita.getHeight() - 10;
+        Image iconoBoton = ImageIO.read(Mensaje.SADNESS);
+        iconoBoton = iconoBoton.getScaledInstance(dimension, dimension, Image.SCALE_SMOOTH);
+        btnTriste.setIcon(new ImageIcon(iconoBoton));
+        btnTriste.setText("");
+
+        iconoBoton = ImageIO.read(Mensaje.ANGER);
+        iconoBoton = iconoBoton.getScaledInstance(dimension, dimension, Image.SCALE_SMOOTH);
+        btnEnojado.setIcon(new ImageIcon(iconoBoton));
+        btnEnojado.setText("");
+
+        iconoBoton = ImageIO.read(Mensaje.HEART);
+        iconoBoton = iconoBoton.getScaledInstance(dimension, dimension, Image.SCALE_SMOOTH);
+        btnCorazon.setIcon(new ImageIcon(iconoBoton));
+        btnCorazon.setText("");
+
+        iconoBoton = ImageIO.read(Mensaje.POOP);
+        iconoBoton = iconoBoton.getScaledInstance(dimension, dimension, Image.SCALE_SMOOTH);
+        btnCaquita.setIcon(new ImageIcon(iconoBoton));
+        btnCaquita.setText("");
+
+        iconoBoton = ImageIO.read(Mensaje.SMILE);
+        iconoBoton = iconoBoton.getScaledInstance(dimension, dimension, Image.SCALE_SMOOTH);
+        btnFeliz.setIcon(new ImageIcon(iconoBoton));
+        btnFeliz.setText("");
     }
 
     /**
@@ -100,6 +138,10 @@ public class Chat extends javax.swing.JFrame {
         });
 
         btnCaquita.setText("<:3");
+        btnCaquita.setToolTipText("");
+        btnCaquita.setMaximumSize(new java.awt.Dimension(31, 31));
+        btnCaquita.setMinimumSize(new java.awt.Dimension(31, 31));
+        btnCaquita.setPreferredSize(new java.awt.Dimension(31, 31));
         btnCaquita.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCaquitaActionPerformed(evt);
@@ -107,6 +149,9 @@ public class Chat extends javax.swing.JFrame {
         });
 
         btnFeliz.setText("=)");
+        btnFeliz.setMaximumSize(new java.awt.Dimension(31, 31));
+        btnFeliz.setMinimumSize(new java.awt.Dimension(31, 31));
+        btnFeliz.setPreferredSize(new java.awt.Dimension(31, 31));
         btnFeliz.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnFelizActionPerformed(evt);
@@ -114,6 +159,9 @@ public class Chat extends javax.swing.JFrame {
         });
 
         btnEnojado.setText(">=|");
+        btnEnojado.setMaximumSize(new java.awt.Dimension(31, 31));
+        btnEnojado.setMinimumSize(new java.awt.Dimension(31, 31));
+        btnEnojado.setPreferredSize(new java.awt.Dimension(31, 31));
         btnEnojado.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnEnojadoActionPerformed(evt);
@@ -121,6 +169,9 @@ public class Chat extends javax.swing.JFrame {
         });
 
         btnCorazon.setText("<3");
+        btnCorazon.setMaximumSize(new java.awt.Dimension(31, 31));
+        btnCorazon.setMinimumSize(new java.awt.Dimension(31, 31));
+        btnCorazon.setPreferredSize(new java.awt.Dimension(31, 31));
         btnCorazon.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCorazonActionPerformed(evt);
@@ -128,6 +179,9 @@ public class Chat extends javax.swing.JFrame {
         });
 
         btnTriste.setText("='(");
+        btnTriste.setMaximumSize(new java.awt.Dimension(31, 31));
+        btnTriste.setMinimumSize(new java.awt.Dimension(31, 31));
+        btnTriste.setPreferredSize(new java.awt.Dimension(31, 31));
         btnTriste.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnTristeActionPerformed(evt);
@@ -158,6 +212,11 @@ public class Chat extends javax.swing.JFrame {
             }
         });
 
+        listUsuarios.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                listUsuariosMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(listUsuarios);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -179,15 +238,15 @@ public class Chat extends javax.swing.JFrame {
                             .addComponent(jLabel1)
                             .addComponent(jLabel3)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(btnCaquita)
+                                .addComponent(btnCaquita, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnFeliz)
+                                .addComponent(btnFeliz, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnEnojado)
+                                .addComponent(btnEnojado, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnCorazon)
+                                .addComponent(btnCorazon, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnTriste)))
+                                .addComponent(btnTriste, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -220,18 +279,19 @@ public class Chat extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnVolver)
-                    .addComponent(btnTriste)
-                    .addComponent(btnCorazon)
-                    .addComponent(btnEnojado)
-                    .addComponent(btnFeliz)
-                    .addComponent(btnCaquita))
+                    .addComponent(btnTriste, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnCorazon, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnEnojado, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnFeliz, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnCaquita, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnCargarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCargarActionPerformed
+//GEN-FIRST:event_btnCargarActionPerformed
+    private void btnCargarActionPerformed(java.awt.event.ActionEvent evt) {
         // TODO add your handling code here:
         JFileChooser jfc = new JFileChooser();
         jfc.setDialogTitle("Selecciona una imagen a enviar");
@@ -242,16 +302,21 @@ public class Chat extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnCargarActionPerformed
 
-    private void btnVolverActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVolverActionPerformed
+    //GEN-FIRST:event_btnVolverActionPerformed
+    private void btnVolverActionPerformed(java.awt.event.ActionEvent evt) {
         // TODO add your handling code here:
+        listUsuarios.clearSelection();
+        dest = null;
     }//GEN-LAST:event_btnVolverActionPerformed
 
-    private void btnCorazonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCorazonActionPerformed
+    //GEN-FIRST:event_btnCorazonActionPerformed
+    private void btnCorazonActionPerformed(java.awt.event.ActionEvent evt) {
         // TODO add your handling code here:
         agregarEmoji(obtenerMensaje() + " <3 ");
     }//GEN-LAST:event_btnCorazonActionPerformed
 
-    private void btnCaquitaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCaquitaActionPerformed
+    //GEN-FIRST:event_btnCaquitaActionPerformed
+    private void btnCaquitaActionPerformed(java.awt.event.ActionEvent evt) {
         // TODO add your handling code here:
         agregarEmoji(obtenerMensaje() + " :poop: ");
     }//GEN-LAST:event_btnCaquitaActionPerformed
@@ -280,56 +345,33 @@ public class Chat extends javax.swing.JFrame {
             // TODO add your handling code here:
             Mensaje msj = new Mensaje();
             msj.setUsuario(this.nickname);
+            msj.setMensaje(obtenerMensaje());
+            if (dest != null)
+                msj.setDestinatario(dest);
             if (imagen != null) {
-                msj.setImagen(imagen.getAbsolutePath());
                 msj.setTipoMensaje(Mensaje.IMAGEN);
                 btnCargar.setText("Cargar Imagen");
+                enviar.enviarImagen(imagen, msj);
                 imagen = null;
+            } else {
+                enviar.enviarMensaje(msj);
             }
-            msj.setMensaje(obtenerMensaje());
             txtAreaMensaje.setText("");
-            c.enviarMensaje(msj);
         } catch (IOException ex) {
             Logger.getLogger(Chat.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_btnEnviarActionPerformed
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and
-        feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager
-                    .getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(Chat.class.getName())
-                    .log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(Chat.class.getName())
-                    .log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(Chat.class.getName())
-                    .log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(Chat.class.getName())
-                    .log(java.util.logging.Level.SEVERE, null, ex);
+    //GEN-FIRST:event_listUsuariosMouseClicked
+    private void listUsuariosMouseClicked(java.awt.event.MouseEvent evt) {
+        // TODO add your handling code here:
+        JList jlist = (JList) evt.getSource();
+        if (evt.getClickCount() == 1) {
+            int index = jlist.locationToIndex(evt.getPoint());
+            System.out.println("Destinatario: "+ modelo.get(index));
+            dest = (String) modelo.get(index);
         }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new Chat().setVisible(true));
-    }
+    }//GEN-LAST:event_listUsuariosMouseClicked
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCaquita;
@@ -346,7 +388,7 @@ public class Chat extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
-    private static javax.swing.JList<String> listUsuarios;
+    private javax.swing.JList<String> listUsuarios;
     private javax.swing.JEditorPane panelMensajes;
     private javax.swing.JTextArea txtAreaMensaje;
     // End of variables declaration//GEN-END:variables
@@ -356,7 +398,7 @@ public class Chat extends javax.swing.JFrame {
     }
 
     private void obtenerBody() {
-        styleSheet = new StyleSheet();
+        StyleSheet styleSheet = new StyleSheet();
         HTMLEditorKit kit = (HTMLEditorKit) panelMensajes.getEditorKit();
         styleSheet.addRule("div {max-width:295px; word-wrap:break-word; overflow: hidden; width:295px;}");
         kit.setStyleSheet(styleSheet);
@@ -376,19 +418,16 @@ public class Chat extends javax.swing.JFrame {
     }
 
     private void crearSocket() {
-        String dir="235.1.1.1";
-        int puerto = 4445;
         try {
-            InetAddress grupo = InetAddress.getByName(dir);
-            MulticastSocket multicastSocket = new MulticastSocket(puerto);
+            InetAddress grupo = InetAddress.getByName(DIRECCION);
+            MulticastSocket multicastSocket = new MulticastSocket(PUERTO);
             multicastSocket.joinGroup(grupo);
-            multicastSocket.setTimeToLive(255);
             multicastSocket.setReuseAddress(true);
 
-            s = new Servidor(multicastSocket);
-            c = new Cliente(multicastSocket, grupo);
+            Recibir recibir = new Recibir(multicastSocket, this.nickname);
+            enviar = new Enviar(multicastSocket, grupo, PUERTO);
 
-            new Thread(s).start();
+            new Thread(recibir).start();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -396,7 +435,8 @@ public class Chat extends javax.swing.JFrame {
     }
 
     public static void agregarMensaje(Mensaje msj) throws IOException, BadLocationException {
-        doc.insertBeforeEnd(body, msj.construirMensaje());
+        if (Objects.equals(msj.getDestinatario(), dest) || msj.getDestinatario() == null || Objects.equals(msj.getDestinatario(), nickname) )
+            doc.insertBeforeEnd(body, msj.construirMensaje());
     }
 
     private void agregarEmoji(String msj) {
@@ -405,5 +445,11 @@ public class Chat extends javax.swing.JFrame {
 
     public static void agregarUsuarioLista(String usuario) {
         modelo.addElement(usuario);
+    }
+
+    public static void cargarListaConectados(ArrayList<String> conectados) {
+        modelo.clear();
+        for (String usuario : conectados)
+            agregarUsuarioLista(usuario);
     }
 }
