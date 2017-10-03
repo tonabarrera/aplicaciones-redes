@@ -32,7 +32,7 @@ public class Descubre {
                 cl.receive(p);
                 System.out.println("Datagrama recibido..");
                 String msj = new String(p.getData());  
-                System.out.println("Servidor descubierto: "+p.getAddress());
+                System.out.println("Servidor descubierto: "+p.getAddress()+"msj: "+msj);
                
             }//for
             
