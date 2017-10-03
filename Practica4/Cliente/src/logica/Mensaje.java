@@ -3,7 +3,6 @@ package logica;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class Mensaje implements Serializable {
     public static final int ICONO = 0;

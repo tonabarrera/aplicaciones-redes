@@ -27,26 +27,31 @@ void *get_in_addr(struct sockaddr *sa)
 int main(){
  
  struct addrinfo hints, *servinfo, *p;
+ // descriptor, mandar datos, bits enviados
  int cd,n,n1,rv,op=0;
- char *srv="2001::1234:0001";
-  
+ // Publica
+ char *srv="2001::1234:1"; // direccion IPv6
+    // Limpiamos llenando de ceros
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6  familia de dir*/
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_protocol = 0;
+    hints.ai_socktype = SOCK_STREAM; // Usaremos socket de flujo
+    hints.ai_protocol = 0; // Puedo especificar TCP pero mejor que lo haga el sistema
 
+    // Pila de protocolos para IP
     if ((rv = getaddrinfo(srv, pto, &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         return 1;
     }
-
+    // Intentamos crear el socket con algun protocolo devuelto en la parte anterior
+    // Como IPv4 e IPv6
     for(p = servinfo; p != NULL; p = p->ai_next) {
         if ((cd = socket(p->ai_family, p->ai_socktype,p->ai_protocol)) == -1) {
             perror("client: socket");
             continue;
         }
-
-	/*if (setsockopt(cd, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&op, sizeof(op)) == -1) {
+        // Modifica opciones del socket como el tiempo de vida, el timeout, etc.
+        // identificador, capa en la que se encuentra, nivel en el que opera, opcion y tamaño
+	   /*if (setsockopt(cd, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&op, sizeof(op)) == -1) {
             perror("setsockopt   no soporta IPv6");
             exit(1);
         }*/
@@ -59,16 +64,16 @@ int main(){
 
         break;
     }//for
-
+    // Si no me pude conectar
     if (p == NULL) {
         fprintf(stderr, "client: error al conectar con el servidor\n");
         return 2;
     }
 
     freeaddrinfo(servinfo); // all done with this structure
-
+    // Asociamos con un descriptor de archivo
 FILE *f = fdopen(cd,"w+");
- printf("Conexionen establecida.. Escribe una serie de cadenas <enter> para enviar, SALIR para terminar\n");
+ printf("Conexionen establecida.. Escribe una serie de cadenas <enter> para enviar, SALIR para terminar\nz");
  
 char *linea=(char *)malloc(sizeof(char)*50);
 bzero(linea,sizeof(linea)); 
