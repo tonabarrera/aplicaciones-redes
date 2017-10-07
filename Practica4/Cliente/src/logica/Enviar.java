@@ -7,13 +7,12 @@ import java.net.MulticastSocket;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
-import static logica.MulticastConstantes.TAM_BUFFER;
 
 /**
  * @author tona created on 14/09/2017 for Practica4.
  */
 
-public class Enviar implements MulticastConstantes{
+public class Enviar implements MulticastUtilidades {
     private MulticastSocket socket;
     private InetAddress grupo;
     private int puerto;
@@ -83,6 +82,12 @@ public class Enviar implements MulticastConstantes{
             mensaje.setEnviados(n);
             enviarMensaje(mensaje);
             leidos += n;
+            System.out.println("Bytes " + leidos);
+            try {
+                Thread.sleep(5);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
         dis.close();
     }
