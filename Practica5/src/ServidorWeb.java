@@ -173,6 +173,9 @@ public class ServidorWeb {
                     headerResponse = headerResponse + "Date: " + new Date() + " \n";
                     headerResponse = headerResponse + "Content-Length: " + contentSize + " \n";
                     headerResponse = headerResponse + "\n";
+                    bos.write(headerResponse.getBytes());
+                    bos.flush();
+                    
                     return;
                 }else{
                     bis2 = new BufferedInputStream(new FileInputStream(URI));
