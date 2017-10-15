@@ -44,9 +44,9 @@ public class Servidor implements MulticastConstantes {
         }
     }
     
-    protected static Mensaje recuperarMensaje(DatagramPacket paquete) throws IOException, ClassNotFoundException {
+    private static Mensaje recuperarMensaje(DatagramPacket paquete) throws IOException, ClassNotFoundException {
         System.out.println("Datagrama recibido, extrayendo informacion...");
-        System.out.printf("Host remoto: %s:%s", paquete.getAddress().getHostAddress(), paquete.getPort());
+        System.out.printf("Host remoto: %s:%s\n", paquete.getAddress().getHostAddress(), paquete.getPort());
         System.out.println("Datos del paquete:");
         ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(paquete.getData()));
         Mensaje msj = (Mensaje) ois.readObject();
@@ -56,7 +56,7 @@ public class Servidor implements MulticastConstantes {
         return msj;
     }
 
-    protected static void enviarMensaje(Mensaje msj) throws IOException {
+    private static void enviarMensaje(Mensaje msj) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream(TAM_BUFFER);
         ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(baos));
         oos.flush();
