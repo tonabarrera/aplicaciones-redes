@@ -20,66 +20,66 @@ public class ServidorWeb {
         public Manejador(Socket _socket) throws Exception {
             this.socket = _socket;
             this.extensiones = new HashMap<String, String>();
-            extensiones.put("aac", "audio-aac");
-            extensiones.put("abw", "application-x-abiword");
-            extensiones.put("arc", "application-octet-stream");
-            extensiones.put("avi", "video-x-msvideo");
-            extensiones.put("azw", "application-vnd.amazon.ebook");
-            extensiones.put("bin", "application-octet-stream");
-            extensiones.put("bz", "application-x-bzip");
-            extensiones.put("bz2", "application-x-bzip2");
-            extensiones.put("csh", "application-x-csh");
-            extensiones.put("css", "text-css");
-            extensiones.put("csv", "text-csv");
-            extensiones.put("epub", "application-epub+zip");
-            extensiones.put("ico", "image-x-icon");
-            extensiones.put("ics", "text-calendar");
-            extensiones.put("jar", "application-java-archive");
-            extensiones.put("js", "application-javascript");
-            extensiones.put("json", "application-json");
-            extensiones.put("mid", "audio-midi");
-            extensiones.put("midi", "audio-midi");
-            extensiones.put("mpkg", "application-vnd.apple.installer+xml");
-            extensiones.put("odp", "application-vnd.oasis.opendocument.presentation");
-            extensiones.put("ods", "application-vnd.oasis.opendocument.spreadsheet");
-            extensiones.put("odt", "application-vnd.oasis.opendocument.text");
-            extensiones.put("oga", "audio-ogg");
-            extensiones.put("ogv", "video-ogg");
-            extensiones.put("ogx", "application-ogg");
-            extensiones.put("ppt", "application-vnd.ms-powerpoint");
-            extensiones.put("rar", "application-x-rar-compressed");
-            extensiones.put("rtf", "application-rtf");
-            extensiones.put("sh", "application-x-sh");
-            extensiones.put("svg", "image-svg+xml");
-            extensiones.put("swf", "application-x-shockwave-flash");
-            extensiones.put("tar", "application-x-tar");
-            extensiones.put("tif", "image-tiff");
-            extensiones.put("tiff", "image-tiff");
-            extensiones.put("ttf", "font-ttf");
-            extensiones.put("vsd", "application-vnd.visio");
-            extensiones.put("wav", "audio-x-wav");
-            extensiones.put("weba", "audio-webm");
-            extensiones.put("webm", "video-webm");
-            extensiones.put("webp", "image-webp");
-            extensiones.put("woff", "font-woff");
-            extensiones.put("woff2", "font-woff2");
-            extensiones.put("xhtml", "application-xhtml+xml");
-            extensiones.put("xls", "application-vnd.ms-excel");
-            extensiones.put("xml", "application-xml");
-            extensiones.put("xul", "application-vnd.mozilla.xul+xml");
-            extensiones.put("zip", "application-zip");
-            extensiones.put("3gp", "video-3gpp");
-            extensiones.put("3g2", "video-3gpp2");
+            extensiones.put("aac", "audio/aac");
+            extensiones.put("abw", "application/x-abiword");
+            extensiones.put("arc", "application/octet-stream");
+            extensiones.put("avi", "video/x-msvideo");
+            extensiones.put("azw", "application/vnd.amazon.ebook");
+            extensiones.put("bin", "application/octet-stream");
+            extensiones.put("bz", "application/x-bzip");
+            extensiones.put("bz2", "application7x-bzip2");
+            extensiones.put("csh", "application/x-csh");
+            extensiones.put("css", "text/css");
+            extensiones.put("csv", "text/csv");
+            extensiones.put("epub", "application/epub+zip");
+            extensiones.put("ico", "image/x-icon");
+            extensiones.put("ics", "text/calendar");
+            extensiones.put("jar", "application/java-archive");
+            extensiones.put("js", "application/javascript");
+            extensiones.put("json", "application/json");
+            extensiones.put("mid", "audio/midi");
+            extensiones.put("midi", "audio/midi");
+            extensiones.put("mpkg", "application/vnd.apple.installer+xml");
+            extensiones.put("odp", "application/vnd.oasis.opendocument.presentation");
+            extensiones.put("ods", "application/vnd.oasis.opendocument.spreadsheet");
+            extensiones.put("odt", "application/vnd.oasis.opendocument.text");
+            extensiones.put("oga", "audio7ogg");
+            extensiones.put("ogv", "video/ogg");
+            extensiones.put("ogx", "application/ogg");
+            extensiones.put("ppt", "application/vnd.ms-powerpoint");
+            extensiones.put("rar", "application/x-rar-compressed");
+            extensiones.put("rtf", "application/rtf");
+            extensiones.put("sh", "application/x-sh");
+            extensiones.put("svg", "image/svg+xml");
+            extensiones.put("swf", "application/x-shockwave-flash");
+            extensiones.put("tar", "application/x-tar");
+            extensiones.put("tif", "image7tiff");
+            extensiones.put("tiff", "image/tiff");
+            extensiones.put("ttf", "font/ttf");
+            extensiones.put("vsd", "application/vnd.visio");
+            extensiones.put("wav", "audio/x-wav");
+            extensiones.put("weba", "audio/webm");
+            extensiones.put("webm", "video/webm");
+            extensiones.put("webp", "image/webp");
+            extensiones.put("woff", "font/woff");
+            extensiones.put("woff2", "font/woff2");
+            extensiones.put("xhtml", "application/xhtml+xml");
+            extensiones.put("xls", "application/vnd.ms-excel");
+            extensiones.put("xml", "application/xml");
+            extensiones.put("xul", "application/vnd.mozilla.xul+xml");
+            extensiones.put("zip", "application/zip");
+            extensiones.put("3gp", "video/3gpp");
+            extensiones.put("3g2", "video/3gpp2");
             extensiones.put("7z", "application-x-7z-compressed");
             
-            extensiones.put("jpg", "image-jpeg");
-            extensiones.put("jpge", "image-jpeg");
-            extensiones.put("doc", "application-msword");
-            extensiones.put("gif", "image-gif");
-            extensiones.put("mpeg", "video-mpeg");
-            extensiones.put("html", "text-html");
-            extensiones.put("htm", "text-html");
-            extensiones.put("pdf", "application-pdf");
+            extensiones.put("jpg", "image/jpeg");
+            extensiones.put("jpge", "image/jpeg");
+            extensiones.put("doc", "application/msword");
+            extensiones.put("gif", "image/gif");
+            extensiones.put("mpeg", "video/mpeg");
+            extensiones.put("html", "text/html");
+            extensiones.put("htm", "text/html");
+            extensiones.put("pdf", "application/pdf");
         }
 
         @Override
@@ -102,6 +102,7 @@ public class ServidorWeb {
                 System.out.println("Datos: " + line + "\r\n\r\n");
 
                 if (!line.contains("?")) {
+                    if (line.toUpperCase().startsWith("GET")){
                     getArch(line);
                     System.out.println("FileName: " + FileName);
                     if (FileName.compareTo("") == 0) {
@@ -110,7 +111,15 @@ public class ServidorWeb {
                         SendA(FileName);
                     }
                     System.out.println(FileName);
-
+                    }else if(line.toUpperCase().startsWith("POST")){
+                        System.out.println("Soy un post");
+                    }else if(line.toUpperCase().startsWith("PUT")){
+                        
+                    }else if(line.toUpperCase().startsWith("HEAD")){
+                        
+                    }else if(line.toUpperCase().startsWith("POST")){
+                        
+                    }
                 } else if (line.toUpperCase().startsWith("GET")) {
                     StringTokenizer tokens = new StringTokenizer(line, "?");
                     String req_a = tokens.nextToken();
@@ -198,10 +207,8 @@ public class ServidorWeb {
                 sb = sb + "Date: " + new Date() + " \n";
                 if (!arg.equals("index.htm")) {
                     String[] partesFileName = arg.split(Pattern.quote("."));
-                    System.out.println("length: " + partesFileName.length);
                     String extension = partesFileName[(partesFileName.length - 1)];
                     System.out.println("Extension pedida: " + extension);
-
                     if (extensiones.containsKey(extension)) {
                         sb = sb + "Content-Type: " + extensiones.get(extension) + " \n";
                     }
@@ -224,6 +231,7 @@ public class ServidorWeb {
                  * ********************************************
                  */
                 while ((b_leidos = bis2.read(buf, 0, buf.length)) != -1) {
+                    System.out.println("leidos: "+b_leidos);
                     bos.write(buf, 0, b_leidos);
 
                 }
