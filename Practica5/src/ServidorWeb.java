@@ -104,14 +104,16 @@ public class ServidorWeb {
                     response.print("</body></html>");
                     socket.close();
                 }else{
+                     HttpRequest httpRequest = new HttpRequest(lineRequest);
                     //GET
                     if(lineRequest.toUpperCase().startsWith("GET")){
-                        HttpRequest httpRequest = new HttpRequest(lineRequest);
                         doGet(httpRequest);      
                     //HEAD
                     }else if(lineRequest.toUpperCase().startsWith("HEAD")){
-                        HttpRequest httpRequest = new HttpRequest(lineRequest);
                         doHead(httpRequest);
+                    //POST
+                    }else if(lineRequest.toUpperCase().startsWith("POST")){
+                        doPost(httpRequest);
                     }
                     response.flush();
                     bos.flush();
@@ -212,7 +214,7 @@ public class ServidorWeb {
 
         @Override
         public void doPost(HttpRequest httpRequest) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            
         }
 
         @Override
