@@ -1,25 +1,45 @@
+import http.HttpRequest;
 import java.net.*;
 import java.io.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 public class ServidorWeb {
 
     public static final int PUERTO = 8000;
     ServerSocket ss;
+    public static 
 
-    class Manejador extends Thread {
+    class Manejador extends Thread implements http.httpMethods{
 
         protected Socket socket;
-        protected PrintWriter pw;
+        protected BufferedInputStream request;
         protected BufferedOutputStream bos;
-        protected BufferedReader br;
+        protected PrintWriter response;
         protected String FileName;
         protected Map<String, String> extensiones;
-
+        protected Map<String, String> archivos;
+        protected int estatusCode;
+        protected byte permiso;
+        protected boolean payload;
+        protected long max_paylod;
+        protected byte estado_servidor;
+        
         public Manejador(Socket _socket) throws Exception {
-            this.socket = _socket;
-            this.extensiones = new HashMap<String, String>();
+            //TODO: 429 Too many requests
+            //TODO: 503 Service unavailable
+            socket = _socket;
+            request = new BufferedInputStream(new DataInputStream(socket.getInputStream()));
+            bos = new BufferedOutputStream(socket.getOutputStream());
+            response = new PrintWriter(new OutputStreamWriter(bos));
+            estatusCode = 200;
+            payload = true;
+            max_paylod = 1500; //1500 para no mandar imagen
+            estado_servidor = 1; //2 - Mantenimiento
+            
+            extensiones = new HashMap<String, String>();
             extensiones.put("aac", "audio/aac");
             extensiones.put("abw", "application/x-abiword");
             extensiones.put("arc", "application/octet-stream");
@@ -27,7 +47,7 @@ public class ServidorWeb {
             extensiones.put("azw", "application/vnd.amazon.ebook");
             extensiones.put("bin", "application/octet-stream");
             extensiones.put("bz", "application/x-bzip");
-            extensiones.put("bz2", "application7x-bzip2");
+            extensiones.put("bz2", "application/x-bzip2");
             extensiones.put("csh", "application/x-csh");
             extensiones.put("css", "text/css");
             extensiones.put("csv", "text/csv");
@@ -43,7 +63,7 @@ public class ServidorWeb {
             extensiones.put("odp", "application/vnd.oasis.opendocument.presentation");
             extensiones.put("ods", "application/vnd.oasis.opendocument.spreadsheet");
             extensiones.put("odt", "application/vnd.oasis.opendocument.text");
-            extensiones.put("oga", "audio7ogg");
+            extensiones.put("oga", "audio/ogg");
             extensiones.put("ogv", "video/ogg");
             extensiones.put("ogx", "application/ogg");
             extensiones.put("ppt", "application/vnd.ms-powerpoint");
@@ -53,7 +73,7 @@ public class ServidorWeb {
             extensiones.put("svg", "image/svg+xml");
             extensiones.put("swf", "application/x-shockwave-flash");
             extensiones.put("tar", "application/x-tar");
-            extensiones.put("tif", "image7tiff");
+            extensiones.put("tif", "image/tiff");
             extensiones.put("tiff", "image/tiff");
             extensiones.put("ttf", "font/ttf");
             extensiones.put("vsd", "application/vnd.visio");
@@ -70,8 +90,8 @@ public class ServidorWeb {
             extensiones.put("zip", "application/zip");
             extensiones.put("3gp", "video/3gpp");
             extensiones.put("3g2", "video/3gpp2");
-            extensiones.put("7z", "application-x-7z-compressed");
-            
+            extensiones.put("7z", "application/x-7z-compressed");
+
             extensiones.put("jpg", "image/jpeg");
             extensiones.put("jpge", "image/jpeg");
             extensiones.put("doc", "application/msword");
@@ -80,177 +100,297 @@ public class ServidorWeb {
             extensiones.put("html", "text/html");
             extensiones.put("htm", "text/html");
             extensiones.put("pdf", "application/pdf");
+            
+            archivos = new HashMap<String, String>();
+            /*Implementar rutina para permisos*/
+            File publico = new File(".");
+            for(File archivo: publico.listFiles()){
+                //En este servidor los archivos xml requieren autorización, cambiar configuración
+                if(archivo.getName().contains("xml")){
+                    archivos.put(archivo.getName(), "folder");
+                }else if(archivo.getName().contains("mf")){
+                    //En el servidor solo se pueden subir archivos .mf, pero no se pueden ver
+                    archivos.put(archivo.getName(),"post");
+                }else{
+                    archivos.put(archivo.getName(), "public");
+                }
+            }
         }
 
         @Override
         public void run() {
             try {
-                br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                bos = new BufferedOutputStream(socket.getOutputStream());
-                pw = new PrintWriter(new OutputStreamWriter(bos));
-                String line = br.readLine();
-                System.out.println("linea:" + line);
-                if (line == null) {
-                    pw.print("<html><head><title>Servidor WEB");
-                    pw.print("</title><body bgcolor=\"#AACCFF\"<br>Linea Vacia</br>");
-                    pw.print("</body></html>");
-                    socket.close();
-                    return;
-                }
+                //Configure maximum request size in this array
+                byte b[] = new byte[1024];
+                request.read(b);
+                String lineRequest = new String(b);
                 System.out.println("\nCliente Conectado desde: " + socket.getInetAddress());
                 System.out.println("Por el puerto: " + socket.getPort());
-                System.out.println("Datos: " + line + "\r\n\r\n");
+                System.out.println("Request: " + lineRequest );
 
-                if (!line.contains("?")) {
-                    if (line.toUpperCase().startsWith("GET")){
-                    getArch(line);
-                    System.out.println("FileName: " + FileName);
-                    if (FileName.compareTo("") == 0) {
-                        SendA("index.htm");
-                    } else {
-                        SendA(FileName);
-                    }
-                    System.out.println(FileName);
-                    }else if(line.toUpperCase().startsWith("POST")){
-                        System.out.println("Soy un post");
-                    }else if(line.toUpperCase().startsWith("PUT")){
-                        
-                    }else if(line.toUpperCase().startsWith("HEAD")){
-                        
-                    }else if(line.toUpperCase().startsWith("POST")){
-                        
-                    }
+                HttpRequest httpRequest = new HttpRequest(lineRequest);
+                //GET
+                if(lineRequest.toUpperCase().startsWith("GET")){
+                    doGet(httpRequest);      
+                //HEAD
+                }else if(lineRequest.toUpperCase().startsWith("HEAD")){
+                    doHead(httpRequest);
+                //POST
+                }else if(lineRequest.toUpperCase().startsWith("POST")){
+                    doPost(httpRequest);
+                //NOT METHOD FOUND 501
+                }else{
+                    response.println("HTTP/1.0 501 Not Implemented");
+                    response.println();
+                }
+                response.flush();
+                bos.flush();
+                //keep-alive
+                socket.close();
+                /*
                 } else if (line.toUpperCase().startsWith("GET")) {
                     StringTokenizer tokens = new StringTokenizer(line, "?");
                     String req_a = tokens.nextToken();
                     String req = tokens.nextToken();
                     System.out.println("Token1: " + req_a + "\r\n\r\n");
                     System.out.println("Token2: " + req + "\r\n\r\n");
-                    pw.println("HTTP/1.0 200 Okay");
-                    pw.flush();
-                    pw.println();
-                    pw.flush();
-                    pw.print("<html><head><title>SERVIDOR WEB");
-                    pw.flush();
-                    pw.print("</title></head><body bgcolor=\"#AACCFF\"><center><h1><br>Parametros Obtenidos..</br></h1>");
-                    pw.flush();
-                    pw.print("<h3><b>" + req + "</b></h3>");
-                    pw.flush();
-                    pw.print("</center></body></html>");
-                    pw.flush();
-                } else {
-                    pw.println("HTTP/1.0 501 Not Implemented");
-                    pw.println();
-                }
-                pw.flush();
-                bos.flush();
-                socket.close();
+                    response.println("HTTP/1.0 200 Okay");
+                    response.flush();
+                    response.println();
+                    response.flush();
+                    response.print("<html><head><title>SERVIDOR WEB");
+                    response.flush();
+                    response.print("</title></head><body bgcolor=\"#AACCFF\"><center><h1><br>Parametros Obtenidos..</br></h1>");
+                    response.flush();
+                    response.print("<h3><b>" + req + "</b></h3>");
+                    response.flush();
+                    response.print("</center></body></html>");
+                    response.flush();
+                }*/
             } catch (IOException e) {
                 System.err.println(e.toString());
             }
         }//run
 
-        public void getArch(String line) {
-            int i;
-            int f;
-            if (line.toUpperCase().startsWith("GET")) {
-                i = line.indexOf("/");
-                f = line.indexOf(" ", i);
-                FileName = line.substring(i + 1, f);
+        public String getURI(String line) {
+            System.out.println("linea: "+line);
+            if(line.equals("/")){
+                return "index.htm";
+            }
+            int i = line.indexOf("/");
+            return line.substring(i+1, line.length());
+        }
+        
+        @Override
+        public void doGet(HttpRequest httpRequest) {
+            //Validaciones de URI 
+            String header;
+            String msj = " OK";
+            String URI = getURI(httpRequest.getValue("GET"));
+            String headerResponse = "";
+            BufferedInputStream bis2;
+            int contentSize = 0;
+            try {
+                File f = new File(URI);
+                //HTTP 400 - Accepted for processing, but not completed
+                if(!f.exists()) { 
+                    estatusCode = 404;
+                    URI = "404.html";
+                }else{
+                    if(!archivos.get(f.getName()).equals("public")){
+                        permiso = 2;
+                    }
+                    if(archivos.get(f.getName()).equals("post")){
+                        permiso = 3;
+                    }
+                }
+                
+                bis2 = new BufferedInputStream(new FileInputStream(URI));
+                bis2.available();
+                contentSize = bis2.available();
+                if(contentSize>max_paylod){
+                    payload = false;
+                    estatusCode = 413;
+                    msj = "El payload excede el size de: "+max_paylod;
+                }
+            //HTTP 200 Accepted and processing
+                headerResponse = headerResponse + "HTTP/1.0 -estatusCode- \n";
+                headerResponse = headerResponse + "Server: Servidor de Juan y Tona 1.0 \n";
+                headerResponse = headerResponse + "Date: " + new Date() + " \n";
+                headerResponse = headerResponse + "Content-Length: " + contentSize + " \n";
+                String[] partesFileName = URI.split(Pattern.quote("."));
+                
+                header = httpRequest.getValue("Accept");
+            //Accept -> Content-type           
+                if (extensiones.containsKey(partesFileName[(partesFileName.length - 1)])) {
+                    if(!header.equals("-1") && (header.contains(extensiones.get(partesFileName[(partesFileName.length - 1)])) || header.contains("*/*"))){
+                        headerResponse = headerResponse + "Content-Type: " + 
+                        extensiones.get(partesFileName[(partesFileName.length - 1)]) + " \n";
+                    }else{
+                       //content type incorrecto
+                        System.out.println("no conozco ese content-type");
+                    }
+                }else{
+                    estatusCode = 400;
+                    msj="Encabezado incorrecto";
+                }              
+            //Accept-Language -> Content-Language
+                header = httpRequest.getValue("Accept-Language");
+                if(!header.equals("-1")){
+                    //ingles
+                    if(header.contains("en-US") || header.contains("en")){
+                        headerResponse = headerResponse + "Content-Language: en \n";
+                    }else{
+                        headerResponse = headerResponse + "Content-Language: es \n";
+                    }
+                }else{
+                    estatusCode = 400;
+                    msj="Encabezado incorrecto";
+                }
+            //Connection -> Connection
+                header = httpRequest.getValue("Connection");
+                if(!header.equals("-1")){
+                    if(header.contains("keep-alive")){
+                        headerResponse = headerResponse + "Connection: keep-alive \n";
+                    }else if(header.contains("close")){
+                        headerResponse = headerResponse + "Connection: close \n"; 
+                    }
+                }else{
+                    headerResponse = headerResponse + "Connection: close \n";
+                    estatusCode = 400;
+                    msj="Encabezado incorrecto";
+                }  
+            //Authorization
+                if(permiso == 2){ //se necesita Autorización
+                    header = httpRequest.getValue("Authorization");
+                    if(!header.equals("-1")){ //check credentials
+                        if(header.contains("Basic")){
+                            payload = true;
+                        }else{
+                            payload = false;
+                            estatusCode = 403;
+                            msj = "Forbidden";
+                        }
+                    }else{
+                        headerResponse = headerResponse + "WWW-Authenticate: Basic realm=\"Manda tus credenciales\"  \n";
+                        msj = "Autenticate";
+                        estatusCode = 401; //send credentials
+                    }
+                }else if(permiso == 3){
+                    estatusCode = 405;
+                    payload=false;
+                    msj="Método no permitido solo POST";
+                }
+            //esta linea completa un http response
+                headerResponse = headerResponse + "\n";
+                headerResponse = headerResponse.replace("-estatusCode-", Integer.toString(estatusCode)+msj);
+                bos.write(headerResponse.getBytes());
+                bos.flush();
+                if(payload==true){
+                    byte[] buf = new byte[1024];
+                    int b_leidos = 0;
+                    while ((b_leidos = bis2.read(buf, 0, buf.length)) != -1) {
+                        bos.write(buf, 0, b_leidos);
+                    }
+                    bos.flush();
+                }
+                
+            } catch (IOException e) {
+                //Implement 505
             }
         }
 
-        public void SendA(String fileName, Socket sc) {
-            //System.out.println(fileName);
-            int fSize = 0;
-            byte[] buffer = new byte[4096];
-            try {
-                DataOutputStream out = new DataOutputStream(sc.getOutputStream());
+        @Override
+        public void doPost(HttpRequest httpRequest) {
+            
+        }
 
-                //sendHeader();
-                FileInputStream f = new FileInputStream(fileName);
-                int x = 0;
-                while ((x = f.read(buffer)) > 0) {
-                    //		System.out.println(x);
-                    out.write(buffer, 0, x);
-                }
-                out.flush();
-                f.close();
-            } catch (FileNotFoundException e) {
-                //msg.printErr("Transaction::sendResponse():1", "El archivo no existe: " + fileName);
-            } catch (IOException e) {
-                //			System.out.println(e.getMessage());
-                //msg.printErr("Transaction::sendResponse():2", "Error en la lectura del archivo: " + fileName);
-            }
+        @Override
+        public void doPut(HttpRequest httpRequest) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
 
-        }//sendA
-
-        public void SendA(String arg) {
-            try {
-                int b_leidos = 0;
-                BufferedInputStream bis2 = new BufferedInputStream(new FileInputStream(arg));
-                byte[] buf = new byte[1024];
-                int tam_bloque = 0;
-                if (bis2.available() >= 1024) {
-                    tam_bloque = 1024;
-                } else {
+        @Override
+        public void doHead(HttpRequest httpRequest) {
+            try{
+                String URI = getURI(httpRequest.getValue("HEAD"));
+                String headerResponse = "";
+                BufferedInputStream bis2;
+                File f = new File(URI);
+                int contentSize = 0;
+                //HTTP 202 - Accepted for processing, but not completed
+                if(!f.exists() || f.isDirectory()) { 
+                    headerResponse = headerResponse + "HTTP/1.0 202 NOT FOUND\n";
+                    headerResponse = headerResponse + "Server: Servidor de Juan y Tona 1.0 \n";
+                    headerResponse = headerResponse + "Date: " + new Date() + " \n";
+                    headerResponse = headerResponse + "Content-Type: text/html \n";
+                    headerResponse = headerResponse + "Content-Length: " + contentSize + " \n";
+                    headerResponse = headerResponse + "\n";
+                    bos.write(headerResponse.getBytes());
+                    bos.flush();
+                    return;
+                }else{
+                    bis2 = new BufferedInputStream(new FileInputStream(URI));
                     bis2.available();
+                    contentSize = bis2.available();
+                    headerResponse = headerResponse + "HTTP/1.0 200 OK\n";
                 }
-
-                int tam_archivo = bis2.available();
-                /**
-                 * ********************************************
-                 */
-                String sb = "";
-                sb = sb + "HTTP/1.0 200 ok\n";
-                sb = sb + "Server: Servidor de Juan y Tona Company/1.0 \n";
-                sb = sb + "Date: " + new Date() + " \n";
-                if (!arg.equals("index.htm")) {
-                    String[] partesFileName = arg.split(Pattern.quote("."));
-                    String extension = partesFileName[(partesFileName.length - 1)];
-                    System.out.println("Extension pedida: " + extension);
-                    if (extensiones.containsKey(extension)) {
-                        sb = sb + "Content-Type: " + extensiones.get(extension) + " \n";
+                //HTTP 200 Accepted and processing
+                headerResponse = headerResponse + "Server: Servidor de Juan y Tona 1.0 \n";
+                headerResponse = headerResponse + "Date: " + new Date() + " \n";
+                headerResponse = headerResponse + "Content-Length: " + contentSize + " \n";
+                String[] partesFileName = URI.split(Pattern.quote("."));
+                
+                //Content-type
+                if (extensiones.containsKey(partesFileName[(partesFileName.length - 1)])) {
+                    headerResponse = headerResponse + "Content-Type: " + 
+                    extensiones.get(partesFileName[(partesFileName.length - 1)]) + " \n";
+                }
+                //Accept-Language
+                String language = httpRequest.getValue("Accept-Language");
+                if(!language.equals("-1")){
+                    if(language.contains("en-US") || language.contains("en")){
+                        headerResponse = headerResponse + "Content-Language: en \n";
                     }
-                } else {
-                    sb = sb + "Content-Type: text-html\n";
                 }
-
-                sb = sb + "Content-Length: " + tam_archivo + " \n";
-                sb = sb + "\n";
-                bos.write(sb.getBytes());
+                //esta linea completa un http response
+                headerResponse = headerResponse + "\n";
+                bos.write(headerResponse.getBytes());
                 bos.flush();
-
-                //out.println("HTTP/1.0 200 ok");
-                //out.println("Server: Axel Server/1.0");
-                //out.println("Date: " + new Date());
-                //out.println("Content-Type: text/html");
-                //out.println("Content-Length: " + mifichero.length());
-                //out.println("\n");
-                /**
-                 * ********************************************
-                 */
-                while ((b_leidos = bis2.read(buf, 0, buf.length)) != -1) {
-                    System.out.println("leidos: "+b_leidos);
-                    bos.write(buf, 0, b_leidos);
-
-                }
-                bos.flush();
-                bis2.close();
-
-            } catch (Exception e) {
-                System.out.println("error" + e.toString());
+            }catch(Exception e){
+                
             }
+        }
 
-        } //SendA
+        @Override
+        public void doDelete(HttpRequest httpRequest) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void doConnect(HttpRequest httpRequest) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void doOptions(HttpRequest httpRequest) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void doTrace(HttpRequest httpRequest) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        
     }//inner class
 
     public ServidorWeb() throws Exception {
-        System.out.println("Iniciando Servidor.......");
         this.ss = new ServerSocket(PUERTO);
-        System.out.println("Servidor iniciado:---OK");
-        System.out.println("Esperando por Cliente....");
+        System.out.println("Servidor iniciado");
+        System.out.println(ss.getInetAddress());
         for (;;) {
+            System.out.println("Esperando por Cliente....");
             Socket accept = ss.accept();
             new Manejador(accept).start();
         }

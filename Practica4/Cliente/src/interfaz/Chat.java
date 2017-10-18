@@ -7,7 +7,7 @@ package interfaz;
 
 import logica.Enviar;
 import logica.Mensaje;
-import logica.MulticastConstantes;
+import logica.MulticastUtilidades;
 import logica.Recibir;
 
 import javax.imageio.ImageIO;
@@ -32,7 +32,7 @@ import java.util.logging.Logger;
 /**
  * @author tona
  */
-public class Chat extends javax.swing.JFrame implements MulticastConstantes{
+public class Chat extends javax.swing.JFrame implements MulticastUtilidades {
     private static Element body = null;
     private static HTMLDocument doc;
     private File imagen;
@@ -53,9 +53,9 @@ public class Chat extends javax.swing.JFrame implements MulticastConstantes{
 
     public Chat(String nickname) {
         this();
-        this.nickname = nickname;
+        Chat.nickname = nickname;
         crearSocket();
-        enviar.enviarAnuncio(this.nickname);
+        enviar.enviarAnuncio(Chat.nickname);
         try {
             ponerIconos();
         } catch (IOException e) {
@@ -309,6 +309,7 @@ public class Chat extends javax.swing.JFrame implements MulticastConstantes{
         dest = null;
     }//GEN-LAST:event_btnVolverActionPerformed
 
+    // <editor-fold defaultstate="collapsed" desc="Emoji">//GEN-BEGIN:emojibuttons
     //GEN-FIRST:event_btnCorazonActionPerformed
     private void btnCorazonActionPerformed(java.awt.event.ActionEvent evt) {
         // TODO add your handling code here:
@@ -338,13 +339,13 @@ public class Chat extends javax.swing.JFrame implements MulticastConstantes{
         // TODO add your handling code here:
         agregarEmoji(obtenerMensaje() + " ='( ");
     }//GEN-LAST:event_btnTristeActionPerformed
-
+    // </editor-fold>//GEN-END:emojiButtons
 //GEN-FIRST:event_btnEnviarActionPerformed
     private void btnEnviarActionPerformed(java.awt.event.ActionEvent evt) {
         try {
             // TODO add your handling code here:
             Mensaje msj = new Mensaje();
-            msj.setUsuario(this.nickname);
+            msj.setUsuario(nickname);
             msj.setMensaje(obtenerMensaje());
             if (dest != null)
                 msj.setDestinatario(dest);
@@ -424,7 +425,7 @@ public class Chat extends javax.swing.JFrame implements MulticastConstantes{
             multicastSocket.joinGroup(grupo);
             multicastSocket.setReuseAddress(true);
 
-            Recibir recibir = new Recibir(multicastSocket, this.nickname);
+            Recibir recibir = new Recibir(multicastSocket, nickname);
             enviar = new Enviar(multicastSocket, grupo, PUERTO);
 
             new Thread(recibir).start();

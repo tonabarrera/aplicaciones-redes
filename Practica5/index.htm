@@ -31,5 +31,19 @@ Comentarios:<br>
 <INPUT TYPE="submit" VALUE="Enviar datos">
 <INPUT TYPE="reset" VALUE="Borrar datos">
 </FORM>
+<p id="demo"></p>
+<button type="button" onclick="loadDoc()">Change Content</button>
+<script>
+	function loadDoc() {
+	  var xhttp = new XMLHttpRequest();
+	  xhttp.onreadystatechange = function() {
+	    if (this.readyState == 4 && this.status == 200) {
+	     document.getElementById("demo").innerHTML = this.responseText;
+	    }
+	  };
+	  xhttp.open("HEAD", "shaq1.jpg", true);
+	  xhttp.send();
+	}
+</script>
 </body>
 </html>
