@@ -37,10 +37,12 @@ public class HttpRequest {
     }
     
     public String getValue(String header){
+        System.out.println("req: "+header);
         if(headers.containsKey(header)){
+            System.out.println("res: "+headers.get(header));
             return headers.get(header);
         }else{
-            return "No se encontro este parametro";
+            return "-1";
         }
     }
 

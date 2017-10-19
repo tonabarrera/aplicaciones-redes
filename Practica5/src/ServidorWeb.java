@@ -177,7 +177,6 @@ public class ServidorWeb {
                     headerResponse = headerResponse + "\n";
                     bos.write(headerResponse.getBytes());
                     bos.flush();
-                    
                     return;
                 }else{
                     bis2 = new BufferedInputStream(new FileInputStream(URI));
@@ -190,13 +189,23 @@ public class ServidorWeb {
                 headerResponse = headerResponse + "Date: " + new Date() + " \n";
                 headerResponse = headerResponse + "Content-Length: " + contentSize + " \n";
                 String[] partesFileName = URI.split(Pattern.quote("."));
-                                
+                //Content-type
                 if (extensiones.containsKey(partesFileName[(partesFileName.length - 1)])) {
                     headerResponse = headerResponse + "Content-Type: " + 
                     extensiones.get(partesFileName[(partesFileName.length - 1)]) + " \n";
                 }
+                //Accept-endoding
+                String encondings = httpRequest.getValue("Accept-Encoding");
+                if(!encondings.equals("-1")){
+                    if(encondings.contains("gzip")){
+                        headerResponse = headerResponse + "Content-Encoding: gzip \n";
+                    }else if(encondings.contains("deflate")){
+                        headerResponse = headerResponse + "Content-Encoding: deflate \n";
+                    }
+                }
                 //esta linea completa un http response
                 headerResponse = headerResponse + "\n";
+                System.out.println("headder: "+headerResponse);
                 bos.write(headerResponse.getBytes());
                 bos.flush();
                 
@@ -214,6 +223,8 @@ public class ServidorWeb {
 
         @Override
         public void doPost(HttpRequest httpRequest) {
+            String URI = getURI(httpRequest.getValue("POST"));
+            System.out.println("post: "+URI);
             
         }
 
