@@ -3,13 +3,9 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-<<<<<<< HEAD
+            <file>file:/home/rocio/Documents/aplicaciones-redes/Practica5/src/http/httpMethods.java</file>
             <file>file:/home/rocio/Documents/aplicaciones-redes/Practica5/src/ServidorWeb.java</file>
-=======
-            <file>file:/C:/Users/djaqcu1/Documents/Escom/Redes/aplicaciones-redes/Practica5/src/http/httpMethods.java</file>
-            <file>file:/C:/Users/djaqcu1/Documents/Escom/Redes/aplicaciones-redes/Practica5/src/http/HttpRequest.java</file>
-            <file>file:/C:/Users/djaqcu1/Documents/Escom/Redes/aplicaciones-redes/Practica5/src/ServidorWeb.java</file>
->>>>>>> e49ed1070265081aac54dbd34c1af1143d3d1970
+            <file>file:/home/rocio/Documents/aplicaciones-redes/Practica5/src/http/HttpRequest.java</file>
         </group>
     </open-files>
 </project-private>
