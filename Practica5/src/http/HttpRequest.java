@@ -17,17 +17,20 @@ public class HttpRequest {
         this.headers = new HashMap<String, String>();
         String [] headerParams = linea.split(Pattern.quote("\n"));
         for(int i = 0; i<headerParams.length;i++){
+            System.out.println("headers: "+headerParams[i]);
             try{
                 if(i==0){
                     String headerValues[] = headerParams[i].split(Pattern.quote(" "));
                     if(headerValues[0].length() > 0){
-                        System.out.println("header REC: "+headerValues[0]+" value: "+headerValues[1]);
                         headers.put(headerValues[0], headerValues[1]);
                     }
                 }else{
-                    if(headerParams[i].length() > 0){
+                    if(headerParams[i].contains(":")){
                         String headerValues[] = headerParams[i].split(Pattern.quote(":"));
                         headers.put(headerValues[0], headerValues[1]);
+                        //System.out.println("header REC: "+headerValues[0]+" value: "+headerValues[1]);
+                    }else{
+                        headers.put("params",headerParams[i]);
                     }
                 }
             }catch(ArrayIndexOutOfBoundsException e){

@@ -6,7 +6,7 @@ package http;
 public interface httpMethods {
     
     /**
-     * Metodos HTTP 1.1 ser implementados por un servidor
+     * Metodos HTTP 1.1 a ser implementados por un servidor
      * @param httpRequest - Objeto que contiene los parametros de una peticion
      * con la semántica de un request http 1.1
      **/
