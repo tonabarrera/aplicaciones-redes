@@ -37,9 +37,9 @@ public class HttpRequest {
     }
     
     public String getValue(String header){
-        System.out.println("req: "+header);
+        //System.out.println("Header: "+header);
         if(headers.containsKey(header)){
-            System.out.println("res: "+headers.get(header));
+            //System.out.println("Value: "+headers.get(header));
             return headers.get(header);
         }else{
             return "-1";

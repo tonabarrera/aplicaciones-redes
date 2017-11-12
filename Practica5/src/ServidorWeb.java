@@ -18,12 +18,25 @@ public class ServidorWeb {
         protected PrintWriter response;
         protected String FileName;
         protected Map<String, String> extensiones;
-
+        protected Map<String, String> archivos;
+        protected int estatusCode;
+        protected byte permiso;
+        protected boolean payload;
+        protected long max_paylod;
+        protected byte estado_servidor;
+        
         public Manejador(Socket _socket) throws Exception {
+            //TODO: 429 Too many requests
+            //TODO: 503 Service unavailable
             socket = _socket;
             request = new BufferedInputStream(new DataInputStream(socket.getInputStream()));
             bos = new BufferedOutputStream(socket.getOutputStream());
             response = new PrintWriter(new OutputStreamWriter(bos));
+            estatusCode = 200;
+            payload = true;
+            max_paylod = 150000; //1500 para no mandar imagen
+            estado_servidor = 1; //2 - Mantenimiento
+            
             extensiones = new HashMap<String, String>();
             extensiones.put("aac", "audio/aac");
             extensiones.put("abw", "application/x-abiword");
@@ -85,6 +98,21 @@ public class ServidorWeb {
             extensiones.put("html", "text/html");
             extensiones.put("htm", "text/html");
             extensiones.put("pdf", "application/pdf");
+            
+            archivos = new HashMap<String, String>();
+            /*Implementar rutina para permisos*/
+            File publico = new File(".");
+            for(File archivo: publico.listFiles()){
+                //En este servidor los archivos xml requieren autorización, cambiar configuración
+                if(archivo.getName().contains("xml")){
+                    archivos.put(archivo.getName(), "folder");
+                }else if(archivo.getName().contains("mf")){
+                    //En el servidor solo se pueden subir archivos .mf, pero no se pueden ver, GET HEAD obligatorio
+                    archivos.put(archivo.getName(),"post");
+                }else{
+                    archivos.put(archivo.getName(), "public");
+                }
+            }
         }
 
         @Override
@@ -98,30 +126,26 @@ public class ServidorWeb {
                 System.out.println("Por el puerto: " + socket.getPort());
                 System.out.println("Request: " + lineRequest );
 
-                if (lineRequest == null) {
-                    response.print("<html><head><title>Servidor WEB");
-                    response.print("</title><body bgcolor=\"#AACCFF\"<br>Linea Vacia</br>");
-                    response.print("</body></html>");
-                    socket.close();
+                HttpRequest httpRequest = new HttpRequest(lineRequest);
+                //GET
+                if(lineRequest.toUpperCase().startsWith("GET")){
+                    doGet(httpRequest);      
+                //HEAD
+                }else if(lineRequest.toUpperCase().startsWith("HEAD")){
+                    doHead(httpRequest);
+                //POST
+                }else if(lineRequest.toUpperCase().startsWith("POST")){
+                    doPost(httpRequest);
+                //NOT METHOD FOUND 501
                 }else{
-                     HttpRequest httpRequest = new HttpRequest(lineRequest);
-                    //GET
-                    if(lineRequest.toUpperCase().startsWith("GET")){
-                        doGet(httpRequest);      
-                    //HEAD
-                    }else if(lineRequest.toUpperCase().startsWith("HEAD")){
-                        doHead(httpRequest);
-                    //POST
-                    }else if(lineRequest.toUpperCase().startsWith("POST")){
-                        doPost(httpRequest);
-                    }
-                    response.flush();
-                    bos.flush();
-                    socket.close();
+                    response.println("HTTP/1.0 501 Not Implemented");
+                    response.println();
                 }
-                
+                response.flush();
+                bos.flush();
+                //keep-alive
+                socket.close();
                 /*
-
                 } else if (line.toUpperCase().startsWith("GET")) {
                     StringTokenizer tokens = new StringTokenizer(line, "?");
                     String req_a = tokens.nextToken();
@@ -140,9 +164,6 @@ public class ServidorWeb {
                     response.flush();
                     response.print("</center></body></html>");
                     response.flush();
-                } else {
-                    response.println("HTTP/1.0 501 Not Implemented");
-                    response.println();
                 }*/
             } catch (IOException e) {
                 System.err.println(e.toString());
@@ -159,72 +180,126 @@ public class ServidorWeb {
         }
         
         @Override
-
         public void doGet(HttpRequest httpRequest) {
             //Validaciones de URI 
+            String header;
+            String msj = " OK";
             String URI = getURI(httpRequest.getValue("GET"));
             String headerResponse = "";
             BufferedInputStream bis2;
             int contentSize = 0;
             try {
                 File f = new File(URI);
-                //HTTP 202 - Accepted for processing, but not completed
-                if(!f.exists() || f.isDirectory()) { 
-                    headerResponse = headerResponse + "HTTP/1.0 202\n";
-                    headerResponse = headerResponse + "Server: Servidor de Juan y Tona 1.0 \n";
-                    headerResponse = headerResponse + "Date: " + new Date() + " \n";
-                    headerResponse = headerResponse + "Content-Length: " + contentSize + " \n";
-                    headerResponse = headerResponse + "\n";
-                    bos.write(headerResponse.getBytes());
-                    bos.flush();
-                    return;
+                //HTTP 400 - Accepted for processing, but not completed
+                if(!f.exists()) { 
+                    estatusCode = 404;
+                    URI = "404.html";
                 }else{
-                    bis2 = new BufferedInputStream(new FileInputStream(URI));
-                    bis2.available();
-                    contentSize = bis2.available();
-                    headerResponse = headerResponse + "HTTP/1.0 200 OK\n";
+                    if(!archivos.get(f.getName()).equals("public")){
+                        permiso = 2;
+                    }
+                    if(archivos.get(f.getName()).equals("post")){
+                        permiso = 3;
+                    }
                 }
-                //HTTP 200 Accepted and processing
+                
+                bis2 = new BufferedInputStream(new FileInputStream(URI));
+                bis2.available();
+                contentSize = bis2.available();
+                if(contentSize>max_paylod){
+                    payload = false;
+                    estatusCode = 413;
+                    msj = "El payload excede el size de: "+max_paylod;
+                }
+            //HTTP 200 Accepted and processing
+                headerResponse = headerResponse + "HTTP/1.0 -estatusCode- \n";
                 headerResponse = headerResponse + "Server: Servidor de Juan y Tona 1.0 \n";
                 headerResponse = headerResponse + "Date: " + new Date() + " \n";
                 headerResponse = headerResponse + "Content-Length: " + contentSize + " \n";
                 String[] partesFileName = URI.split(Pattern.quote("."));
-                //Content-type
+                
+                header = httpRequest.getValue("Accept");
+            //Accept -> Content-type           
                 if (extensiones.containsKey(partesFileName[(partesFileName.length - 1)])) {
-                    headerResponse = headerResponse + "Content-Type: " + 
-                    extensiones.get(partesFileName[(partesFileName.length - 1)]) + " \n";
-                }
-                //Accept-endoding
-                String encondings = httpRequest.getValue("Accept-Encoding");
-                if(!encondings.equals("-1")){
-                    if(encondings.contains("gzip")){
-                        headerResponse = headerResponse + "Content-Encoding: gzip \n";
-                    }else if(encondings.contains("deflate")){
-                        headerResponse = headerResponse + "Content-Encoding: deflate \n";
+                    if(!header.equals("-1") && (header.contains(extensiones.get(partesFileName[(partesFileName.length - 1)])) || header.contains("*/*"))){
+                        headerResponse = headerResponse + "Content-Type: " + 
+                        extensiones.get(partesFileName[(partesFileName.length - 1)]) + " \n";
+                    }else{
+                       //content type incorrecto
+                        System.out.println("no conozco ese content-type");
                     }
+                }else{
+                    estatusCode = 400;
+                    msj="Encabezado incorrecto";
+                }              
+            //Accept-Language -> Content-Language
+                header = httpRequest.getValue("Accept-Language");
+                if(!header.equals("-1")){
+                    //ingles
+                    if(header.contains("en-US") || header.contains("en")){
+                        headerResponse = headerResponse + "Content-Language: en \n";
+                    }else{
+                        headerResponse = headerResponse + "Content-Language: es \n";
+                    }
+                }else{
+                    estatusCode = 400;
+                    msj="Encabezado incorrecto";
                 }
-                //esta linea completa un http response
+            //Connection -> Connection
+                header = httpRequest.getValue("Connection");
+                if(!header.equals("-1")){
+                    if(header.contains("keep-alive")){
+                        headerResponse = headerResponse + "Connection: keep-alive \n";
+                    }else if(header.contains("close")){
+                        headerResponse = headerResponse + "Connection: close \n"; 
+                    }
+                }else{
+                    headerResponse = headerResponse + "Connection: close \n";
+                    estatusCode = 400;
+                    msj="Encabezado incorrecto";
+                }  
+            //Authorization
+                if(permiso == 2){ //se necesita Autorización
+                    header = httpRequest.getValue("Authorization");
+                    if(!header.equals("-1")){ //check credentials
+                        if(header.contains("Basic")){ //funcion autenticacion
+                            payload = true;
+                        }else{
+                            payload = false;
+                            estatusCode = 403;
+                            msj = "Forbidden";
+                        }
+                    }else{
+                        headerResponse = headerResponse + "WWW-Authenticate: Basic realm=\"Manda tus credenciales\"  \n";
+                        msj = "Autenticate";
+                        estatusCode = 401; //send credentials
+                    }
+                }else if(permiso == 3){
+                    estatusCode = 405;
+                    payload=false;
+                    msj="Método no permitido solo POST";
+                }
+            //esta linea completa un http response
                 headerResponse = headerResponse + "\n";
-                System.out.println("headder: "+headerResponse);
+                headerResponse = headerResponse.replace("-estatusCode-", Integer.toString(estatusCode)+msj);
                 bos.write(headerResponse.getBytes());
                 bos.flush();
-                
-                byte[] buf = new byte[1024];
-                int b_leidos = 0;
-                while ((b_leidos = bis2.read(buf, 0, buf.length)) != -1) {
-                    bos.write(buf, 0, b_leidos);
+                if(payload==true){
+                    byte[] buf = new byte[1024];
+                    int b_leidos = 0;
+                    while ((b_leidos = bis2.read(buf, 0, buf.length)) != -1) {
+                        bos.write(buf, 0, b_leidos);
+                    }
+                    bos.flush();
                 }
-                bos.flush();
-                bis2.close();
-            } catch (Exception e) {
-                e.printStackTrace();
+                
+            } catch (IOException e) {
+                //Implement 505
             }
         }
 
         @Override
         public void doPost(HttpRequest httpRequest) {
-            String URI = getURI(httpRequest.getValue("POST"));
-            System.out.println("post: "+URI);
             
         }
 
@@ -263,10 +338,18 @@ public class ServidorWeb {
                 headerResponse = headerResponse + "Date: " + new Date() + " \n";
                 headerResponse = headerResponse + "Content-Length: " + contentSize + " \n";
                 String[] partesFileName = URI.split(Pattern.quote("."));
-                                
+                
+                //Content-type
                 if (extensiones.containsKey(partesFileName[(partesFileName.length - 1)])) {
                     headerResponse = headerResponse + "Content-Type: " + 
                     extensiones.get(partesFileName[(partesFileName.length - 1)]) + " \n";
+                }
+                //Accept-Language
+                String language = httpRequest.getValue("Accept-Language");
+                if(!language.equals("-1")){
+                    if(language.contains("en-US") || language.contains("en")){
+                        headerResponse = headerResponse + "Content-Language: en \n";
+                    }
                 }
                 //esta linea completa un http response
                 headerResponse = headerResponse + "\n";
