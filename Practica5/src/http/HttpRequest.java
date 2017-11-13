@@ -17,7 +17,7 @@ public class HttpRequest {
         this.headers = new HashMap<String, String>();
         String [] headerParams = linea.split(Pattern.quote("\n"));
         for(int i = 0; i<headerParams.length;i++){
-            System.out.println("headers: "+headerParams[i]);
+            //System.out.println("headers: "+headerParams[i]);
             try{
                 if(i==0){
                     String headerValues[] = headerParams[i].split(Pattern.quote(" "));

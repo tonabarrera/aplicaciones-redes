@@ -1,8 +1,12 @@
 import ReglasNegocio.Resource;
+import com.sun.corba.se.spi.orbutil.threadpool.ThreadPool;
 import http.HttpRequest;
 import java.net.*;
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -78,7 +82,7 @@ public class ServidorWeb {
             String lineRequest = new String(b);
             System.out.println("\nCliente Conectado desde: " + socket.getInetAddress());
             System.out.println("Por el puerto: " + socket.getPort());
-            System.out.println("Request: " + lineRequest );
+            //System.out.println("Request: " + lineRequest );
             return lineRequest;
         }
         
@@ -170,12 +174,20 @@ public class ServidorWeb {
                 bos.flush();
                 //keep-alive: evita que el socket se cierre
                 socket.close();
+                /*Timer timer = new Timer();
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        System.out.println("timer");
+                    }
+                  }, 2*60*1000);*/
+                
             } catch (IOException e) {
                 System.err.println(e.toString());
             }
         }//run
         private String getURI(String line) {
-            System.out.println("linea: "+line);
+           // System.out.println("linea: "+line);
             if(line.equals("/")){
                 return "index.htm";
             }
@@ -194,7 +206,7 @@ public class ServidorWeb {
         
         private void enviarHeader(int contentSize) throws IOException{
             String mensaje = Integer.toString(estatusCode)+" "+msj;
-            System.out.println("mensaje: "+mensaje);
+            //System.out.println("mensaje: "+mensaje);
             headerResponse = headerResponse + "\n";
             headerResponse = headerResponse.replace("-estatusCode-", mensaje);
             headerResponse = headerResponse.replace("-contentSize-", Integer.toString(contentSize));
@@ -322,9 +334,9 @@ public class ServidorWeb {
                     writer.println(entry.getKey() + "/" + entry.getValue());
                 }
                 writer.close();
-                estatusCode = 303;
                 msj = "Moved Permanently";
-                headerResponse = headerResponse + "Connection: "+URI+" \n";
+                estatusCode = 303;
+                headerResponse = headerResponse + "Location: post.html \n";
                 enviarHeader(contentSize);
                 
             } catch (FileNotFoundException ex) {
@@ -478,11 +490,12 @@ public class ServidorWeb {
 
             resources.put(archivo.getName(), resource);
         }
-            
+        ExecutorService connectionPool = Executors.newFixedThreadPool(10);
         for (;;) {
             System.out.println("Esperando por Cliente....");
             Socket accept = ss.accept();
-            new Manejador(accept).start();
+            connectionPool.submit(new Manejador(accept));
+            System.out.println("Threads en pool: "+((ThreadPoolExecutor)connectionPool).getPoolSize());
         }
     }
 
