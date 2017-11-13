@@ -77,19 +77,30 @@ int main(int argc, char const *argv[]) {
         if (getnameinfo((struct sockaddr *)&c_addr, sizeof(c_addr), hbuf, sizeof(hbuf), sbuf, 
             sizeof(sbuf), NI_NUMERICHOST | NI_NUMERICSERV) == 0)
             printf("Cliente conectado desde %s:%s\n", hbuf,sbuf);
-        char buffer[2];
-        int n = read(clienteSocket, &buffer, sizeof(buffer));
+        int opcion;
+        int n = read(clienteSocket, &opcion, sizeof(opcion));
+        opcion = ntohl(opcion);
+        if (opcion == 0) {
+            close(clienteSocket);
+            printf("%s\n", "Se cerro la conexion");
+        }
         if (n < 0)
             perror("Error de lectura\n");
         else if (n == 0)
             perror("Socket cerrado\n");
-        int opcion = atoi(buffer);
         if (opcion == 1) {
             int random = rand() % (sizeof(palabras)/sizeof(palabras[0]));
-            write(clienteSocket, palabras[random], strlen(palabras[random]));
+            printf("Enviando palabra %s...\n", palabras[random]);
+            int bytes = write(clienteSocket, palabras[random], strlen(palabras[random]));
+            printf("Enviados %d %ld\n", bytes, strlen(palabras[random]));
         }
-        close(clienteSocket);
+        read(clienteSocket, &opcion, sizeof(opcion));
+        if (opcion == 0) {
+            close(clienteSocket);
+            printf("%s\n", "Se cerro la conexion");
+        }
     }
+
     close(serverSocket);
     printf("Se cerro el servidor\n");
     return 0;
