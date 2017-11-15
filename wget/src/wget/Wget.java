@@ -45,6 +45,7 @@ public class Wget {
                 File file = new File(fileName);
                 file.mkdirs();
                 
+                file = new File(recursoActual.getHtml(sitio.getURI()));
                 FileOutputStream outputStream = new FileOutputStream(file);
                 InputStream is = url.openStream ();
                 

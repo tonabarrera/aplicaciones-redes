@@ -50,6 +50,24 @@ public class Resource {
         if(URI.equals(uri)){
             index = "index.html";
         }else{
+            //TODO:DEJAR solo los folders
+            if(URI.startsWith("/") && URI.contains(".html")){
+                int fin = URI.indexOf(".");
+                URI = URI.substring(0,fin);
+            }
+            index = URI;
+        }
+        return index;
+    }
+    public String getHtml(String uri){
+        String index;
+        if(URI.equals(uri)){
+            index = "index.html";
+        }else{
+            if(URI.startsWith("/") && URI.contains(".html")){
+                int begin = URI.indexOf(".");
+                URI = URI.substring(begin,URI.length()-1);
+            }
             index = URI;
         }
         return index;
