@@ -10,7 +10,11 @@ public class Resource {
     private String Uri;
     private boolean authorization;
     private List<String> methods_allowed;
-
+    /**
+     * @param Uri Ruta donde se buscará el recurso solicitado
+     * @param authorization Nivel de autorización del archivo encontrado en la URI
+     * @param methods_allowed Metodos http que podrán aplicarse al Recurso
+     **/
     public Resource(String Uri, boolean authorization, List<String> methods_allowed) {
         this.Uri = Uri;
         this.authorization = authorization;

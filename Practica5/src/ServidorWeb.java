@@ -1,8 +1,14 @@
 import ReglasNegocio.Resource;
+import com.sun.corba.se.spi.orbutil.threadpool.ThreadPool;
 import http.HttpRequest;
 import java.net.*;
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 public class ServidorWeb {
@@ -13,11 +19,12 @@ public class ServidorWeb {
     //mantenimiento
     public static byte estado_servidor = 1; 
     //max_payload - tamaño maximo para el payload de una response, 1500 para no mandar imagen
-    public static long max_payload = 150000; 
+    public static long max_payload = 150000000; 
     //extensiones - Lista con todos las extensiones permitidas en el servidor
     public static Map<String, String> extensiones;
     //resources - Lista con todos los recursos que actualmente se encuentran en el servidor
     public static Map<String, Resource> resources;
+    //Instancia del servidor
     ServerSocket ss;
     
     /**
@@ -29,14 +36,18 @@ public class ServidorWeb {
          * Constantes para cada conexión
          */
         protected Socket socket;
+        //Entrada del socket
         protected BufferedInputStream request;
+        //Entrada de un archivo
         protected BufferedInputStream bis2;  
+        //Salida del socket
         protected BufferedOutputStream bos;
+        //Wrapper de salida para el socket
         protected PrintWriter response;
        
         //header - permite guardar el valor que traiga un header en la peticion recibida
         protected String header;
-        //msj - mensaje a imprimir después del estatus
+        //msj - mensaje a imprimir después del estatus en el header http
         protected String msj;
         //estatusCode - codigo http devuelto en el response del http
         protected int estatusCode;
@@ -44,12 +55,14 @@ public class ServidorWeb {
         protected boolean payload;
         //headerResponse - guarda la los headers de un response
         protected String headerResponse;
-        //resource - Recurso actual sobre el que se ejecutan los métodos http
+        //resource - Recurso sobre el que se ejecutan los métodos http, incluye URI
         protected Resource resource;
         //URI - Ruta del recuros solicitado
         protected String URI;
         //contentSize - 
         protected int contentSize;
+        //params
+        protected  Map<String, String> params;
         
         public Manejador(Socket _socket) throws Exception {
             //TODO: 429 Too many requests
@@ -69,27 +82,83 @@ public class ServidorWeb {
             String lineRequest = new String(b);
             System.out.println("\nCliente Conectado desde: " + socket.getInetAddress());
             System.out.println("Por el puerto: " + socket.getPort());
-            System.out.println("Request: " + lineRequest );
+            //System.out.println("Request: " + lineRequest );
             return lineRequest;
         }
         
         @Override
         public void run() {
             try {
+                boolean resourceFound = true;
                 String lineRequest = imprimirPeticion();
+                lineRequest = lineRequest+"\n";
+                //Fragmenta la petición recibida en pares, llave - valor
                 HttpRequest httpRequest = new HttpRequest(lineRequest);
                             
                 headerResponse = headerResponse + "HTTP/1.0 -estatusCode- \n";
                 headerResponse = headerResponse + "Server: Servidor de Juan y Tona 1.0 \n";
                 headerResponse = headerResponse + "Date: " + new Date() + " \n";
                 headerResponse = headerResponse + "Content-Length: -contentSize- \n";
+
+                //GET
+                if(lineRequest.toUpperCase().startsWith("GET")){
+                    URI = getURI(httpRequest.getValue("GET"));
+                    resource = resources.get(URI);
+                    StringTokenizer tokens = new StringTokenizer(URI, "?");
+                    if(resource != null){
+                        if(ReglasNegocio.ReglaMetodos.isPermitido("GET", resource)){
+                            doGet(httpRequest);
+                        }else{
+                            estatusCode = 405;
+                            msj="Método GET no permitido sobre la URI";
+                            enviarHeader(estatusCode);
+                        }
+                    }else if(tokens.hasMoreTokens()){
+                        String req = tokens.nextToken();
+                        req = tokens.nextToken();
+                        recibirParametros(req);
+                    }else{
+                        resourceFound = false;
+                    }
+                //HEAD
+                }else if(lineRequest.toUpperCase().startsWith("HEAD")){
+                    URI = getURI(httpRequest.getValue("HEAD"));
+                    resource = resources.get(URI);
+                    if(resource != null){
+                        if(ReglasNegocio.ReglaMetodos.isPermitido("HEAD", resource)){
+                            doHead(httpRequest);
+                        }else{
+                            estatusCode = 405;
+                            msj="Método HEAD no permitido sobre la URI";
+                            enviarHeader(estatusCode);
+                        } 
+                    }else{
+                        resourceFound = false;
+                    }
+                //POST
+                }else if(lineRequest.toUpperCase().startsWith("POST")){
+                    URI = getURI(httpRequest.getValue("POST"));
+                    resource = new Resource(URI);
+                    resource.setAuthorization(ReglasNegocio.ReglaAutorizacion.requireAuthorization(resource));
+                    resource.setMethods_allowed(ReglasNegocio.ReglaMetodos.metodosPermitidos(resource));
+                    resources.put(URI, resource);
+                    
+                    if(ReglasNegocio.ReglaMetodos.isPermitido("POST", resource)){
+                        doPost(httpRequest);
+                    }else{
+                        estatusCode = 405;
+                        msj="Método POST no permitido sobre la URI";
+                        enviarHeader(estatusCode);
+                    }   
+                    
+                //NO METHOD FOUND 501
+                }else{
+                    response.println("HTTP/1.0 501 Not Implemented");
+                    response.println();
+                }
                 
-                 
-                URI = getURI(httpRequest.getValue("GET"));
-                resource = resources.get(URI);
-                
-                //Validaciones de URI 
-                if(resource==null) { 
+                //NO URI FOUND
+                if(resourceFound == false){
                     estatusCode = 404;
                     msj = "Not Found";
                     URI = "404.html";
@@ -100,72 +169,25 @@ public class ServidorWeb {
                     //Enviando respuesta
                     enviarHeader(contentSize);
                     enviarRecurso(bis2);
-                }else{
-                    //GET
-                    if(lineRequest.toUpperCase().startsWith("GET")){
-                        if(ReglasNegocio.ReglaMetodos.isPermitido("GET", resource)){
-                            doGet(httpRequest);
-                        }else{
-                            estatusCode = 405;
-                            msj="Método GET no permitido sobre la URI";
-                            enviarHeader(estatusCode);
-                        }                       
-                    //HEAD
-                    }else if(lineRequest.toUpperCase().startsWith("HEAD")){
-                        if(ReglasNegocio.ReglaMetodos.isPermitido("GET", resource)){
-                            doHead(httpRequest);
-                        }else{
-                            estatusCode = 405;
-                            msj="Método GET no permitido sobre la URI";
-                            enviarHeader(estatusCode);
-                        } 
-                    //POST
-                    }else if(lineRequest.toUpperCase().startsWith("POST")){
-                        if(ReglasNegocio.ReglaMetodos.isPermitido("GET", resource)){
-                            doPost(httpRequest);
-                        }else{
-                            estatusCode = 405;
-                            msj="Método POST no permitido sobre la URI";
-                            enviarHeader(estatusCode);
-                        }         
-                    //NOT METHOD FOUND 501
-                    }else{
-                        response.println("HTTP/1.0 501 Not Implemented");
-                        response.println();
-                    }
                 }
-
                 response.flush();
                 bos.flush();
-                //keep-alive
+                //keep-alive: evita que el socket se cierre
                 socket.close();
-                /*
-                } else if (line.toUpperCase().startsWith("GET")) {
-                    StringTokenizer tokens = new StringTokenizer(line, "?");
-                    String req_a = tokens.nextToken();
-                    String req = tokens.nextToken();
-                    System.out.println("Token1: " + req_a + "\r\n\r\n");
-                    System.out.println("Token2: " + req + "\r\n\r\n");
-                    response.println("HTTP/1.0 200 Okay");
-                    response.flush();
-                    response.println();
-                    response.flush();
-                    response.print("<html><head><title>SERVIDOR WEB");
-                    response.flush();
-                    response.print("</title></head><body bgcolor=\"#AACCFF\"><center><h1><br>Parametros Obtenidos..</br></h1>");
-                    response.flush();
-                    response.print("<h3><b>" + req + "</b></h3>");
-                    response.flush();
-                    response.print("</center></body></html>");
-                    response.flush();
-                }*/
+                /*Timer timer = new Timer();
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        System.out.println("timer");
+                    }
+                  }, 2*60*1000);*/
+                
             } catch (IOException e) {
                 System.err.println(e.toString());
             }
         }//run
-
-        public String getURI(String line) {
-            System.out.println("linea: "+line);
+        private String getURI(String line) {
+           // System.out.println("linea: "+line);
             if(line.equals("/")){
                 return "index.htm";
             }
@@ -173,7 +195,7 @@ public class ServidorWeb {
             return line.substring(i+1, line.length());
         }
         
-        public void enviarRecurso(BufferedInputStream bis2) throws IOException{
+        private void enviarRecurso(BufferedInputStream bis2) throws IOException{
             byte[] buf = new byte[1024];
             int b_leidos;
             while ((b_leidos = bis2.read(buf, 0, buf.length)) != -1) {
@@ -182,14 +204,56 @@ public class ServidorWeb {
             bos.flush();
         }
         
-        public void enviarHeader(int contentSize) throws IOException{
+        private void enviarHeader(int contentSize) throws IOException{
+            String mensaje = Integer.toString(estatusCode)+" "+msj;
+            //System.out.println("mensaje: "+mensaje);
             headerResponse = headerResponse + "\n";
-            headerResponse = headerResponse.replace("-estatusCode-", Integer.toString(estatusCode)+msj);
+            headerResponse = headerResponse.replace("-estatusCode-", mensaje);
             headerResponse = headerResponse.replace("-contentSize-", Integer.toString(contentSize));
             bos.write(headerResponse.getBytes());
             bos.flush();
         }
         
+        private void contentType(String [] partesFileName){
+            if(!header.equals("-1") && (header.contains(extensiones.get(partesFileName[(partesFileName.length - 1)])) || header.contains("*/*"))){
+                headerResponse = headerResponse + "Content-Type: " + 
+                extensiones.get(partesFileName[(partesFileName.length - 1)]) + " \n";
+            }else{
+               //content type incorrecto
+                System.out.println("no conozco ese content-type");
+            }
+        }
+        private void language(){
+            //ingles
+            if(header.contains("en-US") || header.contains("en")){
+                headerResponse = headerResponse + "Content-Language: en \n";
+            }else{
+                headerResponse = headerResponse + "Content-Language: es \n";
+            }
+        }
+        private void recibirParametros(String req){
+            response.println("HTTP/1.0 200 Okay");
+            response.flush();
+            response.println();
+            response.flush();
+            response.print("<html><head><title>SERVIDOR WEB"
+                    + "</title></head><body bgcolor=\"#AACCFF\"><center><h1"
+                    + "><br>Parametros Obtenidos..</br></h1>"
+                    + "<h3><b>" + req + "</b></h3> </center></body></html>");
+            response.flush();
+        }
+        private Map<String,String> params(String params){
+            Map<String, String> parametros = new HashMap<String, String>();
+            String listaParamteros[] = params.split(Pattern.quote("&"));
+            for(String parametroActual: listaParamteros){
+                String aux[] = parametroActual.split(Pattern.quote("="));
+                if(aux[1].length()==0){
+                    aux[1]="";
+                }
+                parametros.put(aux[0], aux[1]);
+            }
+            return parametros;
+        }
         @Override
         public void doGet(HttpRequest httpRequest) {
             try {
@@ -204,19 +268,11 @@ public class ServidorWeb {
                     estatusCode = 413;
                     msj = "El payload excede el size de: "+max_payload;
                 }
-
                 String[] partesFileName = URI.split(Pattern.quote("."));
-                
                 header = httpRequest.getValue("Accept");
             //Accept -> Content-type           
                 if (extensiones.containsKey(partesFileName[(partesFileName.length - 1)])) {
-                    if(!header.equals("-1") && (header.contains(extensiones.get(partesFileName[(partesFileName.length - 1)])) || header.contains("*/*"))){
-                        headerResponse = headerResponse + "Content-Type: " + 
-                        extensiones.get(partesFileName[(partesFileName.length - 1)]) + " \n";
-                    }else{
-                       //content type incorrecto
-                        System.out.println("no conozco ese content-type");
-                    }
+                    contentType(partesFileName);
                 }else{
                     estatusCode = 400;
                     msj="Encabezado incorrecto";
@@ -224,12 +280,7 @@ public class ServidorWeb {
             //Accept-Language -> Content-Language
                 header = httpRequest.getValue("Accept-Language");
                 if(!header.equals("-1")){
-                    //ingles
-                    if(header.contains("en-US") || header.contains("en")){
-                        headerResponse = headerResponse + "Content-Language: en \n";
-                    }else{
-                        headerResponse = headerResponse + "Content-Language: es \n";
-                    }
+                    language();
                 }else{
                     estatusCode = 400;
                     msj="Encabezado incorrecto";
@@ -269,12 +320,32 @@ public class ServidorWeb {
                     enviarRecurso(bis2);
                 }
             } catch (IOException e) {
-                //Implement 505
+                //Implement 505: poner enviarHeader(), enviarRecurso() pero usaria otro try catch
             }
         }
 
         @Override
         public void doPost(HttpRequest httpRequest) {
+            PrintWriter writer = null;
+            try {
+                writer = new PrintWriter(URI, "UTF-8");
+                params = params(httpRequest.getValue("params"));
+                for (Map.Entry<String, String> entry : params.entrySet()){
+                    writer.println(entry.getKey() + "/" + entry.getValue());
+                }
+                writer.close();
+                msj = "Moved Permanently";
+                estatusCode = 303;
+                headerResponse = headerResponse + "Location: post.html \n";
+                enviarHeader(contentSize);
+                
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(ServidorWeb.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (UnsupportedEncodingException ex) {
+                Logger.getLogger(ServidorWeb.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                Logger.getLogger(ServidorWeb.class.getName()).log(Level.SEVERE, null, ex);
+            }
             
         }
 
@@ -286,52 +357,34 @@ public class ServidorWeb {
         @Override
         public void doHead(HttpRequest httpRequest) {
             try{
-                String URI = getURI(httpRequest.getValue("HEAD"));
-                String headerResponse = "";
-                BufferedInputStream bis2;
                 File f = new File(URI);
-                int contentSize = 0;
+                contentSize = 0;
+                payload = false;
                 //HTTP 202 - Accepted for processing, but not completed
                 if(!f.exists() || f.isDirectory()) { 
-                    headerResponse = headerResponse + "HTTP/1.0 202 NOT FOUND\n";
-                    headerResponse = headerResponse + "Server: Servidor de Juan y Tona 1.0 \n";
-                    headerResponse = headerResponse + "Date: " + new Date() + " \n";
-                    headerResponse = headerResponse + "Content-Type: text/html \n";
-                    headerResponse = headerResponse + "Content-Length: " + contentSize + " \n";
-                    headerResponse = headerResponse + "\n";
-                    bos.write(headerResponse.getBytes());
-                    bos.flush();
-                    return;
+                    estatusCode = 202;
+                    msj = "FOUND BUT INCOMPLETE";
                 }else{
+                    //HTTP 200 Accepted and processing
                     bis2 = new BufferedInputStream(new FileInputStream(URI));
                     bis2.available();
                     contentSize = bis2.available();
-                    headerResponse = headerResponse + "HTTP/1.0 200 OK\n";
-                }
-                //HTTP 200 Accepted and processing
-                headerResponse = headerResponse + "Server: Servidor de Juan y Tona 1.0 \n";
-                headerResponse = headerResponse + "Date: " + new Date() + " \n";
-                headerResponse = headerResponse + "Content-Length: " + contentSize + " \n";
-                String[] partesFileName = URI.split(Pattern.quote("."));
-                
-                //Content-type
-                if (extensiones.containsKey(partesFileName[(partesFileName.length - 1)])) {
-                    headerResponse = headerResponse + "Content-Type: " + 
-                    extensiones.get(partesFileName[(partesFileName.length - 1)]) + " \n";
+                    estatusCode = 200;
+                    msj = "OK";
                 }
                 //Accept-Language
-                String language = httpRequest.getValue("Accept-Language");
-                if(!language.equals("-1")){
-                    if(language.contains("en-US") || language.contains("en")){
-                        headerResponse = headerResponse + "Content-Language: en \n";
-                    }
+                header = httpRequest.getValue("Accept-Language");
+                if(!header.equals("-1")){
+                    language();
                 }
-                //esta linea completa un http response
-                headerResponse = headerResponse + "\n";
-                bos.write(headerResponse.getBytes());
-                bos.flush();
+                //Send header
+                enviarHeader(contentSize);
+                //Validate HEAD doesnt contains payload
+                if(payload==true){
+                    enviarRecurso(bis2);
+                }
             }catch(Exception e){
-                
+                //Implement 505
             }
         }
 
@@ -437,11 +490,12 @@ public class ServidorWeb {
 
             resources.put(archivo.getName(), resource);
         }
-            
+        ExecutorService connectionPool = Executors.newFixedThreadPool(10);
         for (;;) {
             System.out.println("Esperando por Cliente....");
             Socket accept = ss.accept();
-            new Manejador(accept).start();
+            connectionPool.submit(new Manejador(accept));
+            System.out.println("Threads en pool: "+((ThreadPoolExecutor)connectionPool).getPoolSize());
         }
     }
 
