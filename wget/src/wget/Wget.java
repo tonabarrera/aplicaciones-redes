@@ -2,10 +2,8 @@ package wget;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -18,12 +16,15 @@ public class Wget {
     public static Queue<Resource> linksActuales = new LinkedList<>();
     public static ArrayList<String> linksDescargados = new ArrayList<>();
     public static ArrayList<String> linksActualesString = new ArrayList<>();
+    public static Mime  mime = new Mime();
     
     public static void main(String[] args) {
+        
         Scanner sc = new Scanner(System.in);
         System.out.println("Sitio: ");
-        Resource sitio = new Resource(sc.nextLine(), 1);
-        
+        Resource sitio = new Resource(sc.nextLine(), mime,1);
+        String base = sitio.getURI();
+                
         URL url;
         HttpURLConnection connection;
         linksActuales.add(sitio);
@@ -33,19 +34,26 @@ public class Wget {
             //Conexión
                 Resource recursoActual = linksActuales.poll();
                 linksDescargados.add(recursoActual.getURI());
-                System.out.println("Obteniendo: "+recursoActual.getChild(sitio.getURI()));
-                url = new URL(recursoActual.getChild(sitio.getURI()));
+                url = new URL(recursoActual.getURI(base));
                 connection =  (HttpURLConnection)url.openConnection();
             //Guardar  
-                String fileName = recursoActual.isIndex(sitio.getURI());
                 if(connection.getResponseCode() != 200){
                     continue;
                 }
-                System.out.println("file: "+fileName);
-                File file = new File(fileName);
-                file.mkdirs();
+                recursoActual.setContenyType(connection.getContentType());
+                File file;
+                recursoActual.crearDirectorios(base);
+                //System.out.println("file: "+fileName+" tipo: "+recursoActual.tipo);
+                if(recursoActual.getDirectorio()!=null){
+                    String fd = "."+recursoActual.getDirectorio()+recursoActual.getNombreArchivo();
+                    file = new File(fd);
+                    file.getParentFile().mkdirs();
+                    file.createNewFile();
+                }else{
+                    file =  new File(recursoActual.getNombreArchivo());
+                }
+                                
                 
-                file = new File(recursoActual.getHtml(sitio.getURI()));
                 FileOutputStream outputStream = new FileOutputStream(file);
                 InputStream is = url.openStream ();
                 
@@ -57,14 +65,13 @@ public class Wget {
                     analizeLine(new String(byteChunk));
                     outputStream.write(byteChunk, 0, read);
                 }
+                
                 outputStream.close();
                 is.close(); 
                 
                 System.out.println("Descargados : "+linksDescargados.size()+" Faltantes: "+linksActuales.size());
             
-            } catch (MalformedURLException e) {
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (Exception e) {
             }
         }//while
         System.out.println("Listo");
@@ -100,11 +107,9 @@ public class Wget {
     }
     private static void analizarLink(String link){
         //Validar mismo servidor
-        if(!link.contains("http:") && !link.contains("https:") && !link.contains("#")){
+        if(!link.contains("http:") && !link.contains("https:") && !link.contains("#") && !link.contains("?")){
             //Limpiando
             link = limpiarLink(link);
-            //Folder
-            //crearDirectorios(link);
             //Descargado
             validarDescargado(link);
         }//contains(http)
@@ -120,24 +125,13 @@ public class Wget {
         }
         return url;
     }
-    private static void crearDirectorios(String ruta){
-        if(ruta.contains("/")){
-            String []folder = ruta.split(Pattern.quote("/"));
-            if(folder.length > 0){
-                File directorio = new File(folder[0]);
-                if (!directorio.exists()) {
-                    try{ directorio.mkdir(); } 
-                    catch(SecurityException se){}        
-                }
-            }
-        }
-    }
+
     private static void validarDescargado(String link){
         //System.out.println("lista: "+linksDescargados.size());
         if(linksDescargados.contains(link) || linksActualesString.contains(link)){                  
                 
         }else{
-            Resource recurso = new Resource(link, 1);
+            Resource recurso = new Resource(link,mime, 1);
             linksActuales.add(recurso);
             linksActualesString.add(link);
         }
