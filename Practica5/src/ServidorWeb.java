@@ -1,8 +1,10 @@
 import ReglasNegocio.Resource;
-import com.sun.corba.se.spi.orbutil.threadpool.ThreadPool;
 import http.HttpRequest;
 import java.net.*;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -44,7 +46,6 @@ public class ServidorWeb {
         protected BufferedOutputStream bos;
         //Wrapper de salida para el socket
         protected PrintWriter response;
-       
         //header - permite guardar el valor que traiga un header en la peticion recibida
         protected String header;
         //msj - mensaje a imprimir después del estatus en el header http
@@ -114,7 +115,8 @@ public class ServidorWeb {
                             enviarHeader(estatusCode);
                         }
                     }else if(tokens.hasMoreTokens()){
-                        String req = tokens.nextToken();
+                        String req;
+                        tokens.nextToken();
                         req = tokens.nextToken();
                         recibirParametros(req);
                     }else{
@@ -147,12 +149,25 @@ public class ServidorWeb {
                         doPost(httpRequest);
                     }else{
                         estatusCode = 405;
-                        msj="Método POST no permitido sobre la URI";
+                        msj="Metodo POST no permitido sobre la URI";
                         enviarHeader(estatusCode);
                     }   
-                    
-                //NO METHOD FOUND 501
-                }else{
+                //DELETE
+                }else if(lineRequest.toUpperCase().startsWith("DELETE")){
+                    URI = getURI(httpRequest.getValue("DELETE"));
+                    resource = resources.get(URI);
+                    if(resource != null){
+                        if(ReglasNegocio.ReglaMetodos.isPermitido("DELETE", resource)){
+                            doDelete(httpRequest);
+                        }else{
+                            estatusCode = 405;
+                            msj="Metodo DELETE no permitido sobre la URI";
+                            enviarHeader(estatusCode);
+                        }
+                    }else{
+                        resourceFound = false;
+                    }
+                }else{//NO METHOD FOUND 501
                     response.println("HTTP/1.0 501 Not Implemented");
                     response.println();
                 }
@@ -182,12 +197,12 @@ public class ServidorWeb {
                     }
                   }, 2*60*1000);*/
                 
-            } catch (IOException e) {
+            }catch(IOException e) {
                 System.err.println(e.toString());
             }
         }//run
         private String getURI(String line) {
-           // System.out.println("linea: "+line);
+            //System.out.println("linea: "+line);
             if(line.equals("/")){
                 return "index.htm";
             }
@@ -326,9 +341,9 @@ public class ServidorWeb {
 
         @Override
         public void doPost(HttpRequest httpRequest) {
-            PrintWriter writer = null;
+            PrintWriter writer;
             try {
-                writer = new PrintWriter(URI, "UTF-8");
+                writer = new PrintWriter(URI);
                 params = params(httpRequest.getValue("params"));
                 for (Map.Entry<String, String> entry : params.entrySet()){
                     writer.println(entry.getKey() + "/" + entry.getValue());
@@ -351,7 +366,7 @@ public class ServidorWeb {
 
         @Override
         public void doPut(HttpRequest httpRequest) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            throw new UnsupportedOperationException("Not supported yet.");
         }
 
         @Override
@@ -383,29 +398,50 @@ public class ServidorWeb {
                 if(payload==true){
                     enviarRecurso(bis2);
                 }
-            }catch(Exception e){
+            }catch(IOException e){
                 //Implement 505
             }
         }
 
         @Override
         public void doDelete(HttpRequest httpRequest) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            try{
+                File f = new File(URI);
+                contentSize = 0;
+                payload = false;
+                //HTTP 202 - Accepted for processing, but not completed
+                if(!f.exists() || f.isDirectory()) { 
+                    estatusCode = 202;
+                    msj = "FOUND BUT INCOMPLETE";
+                }else{
+                    //HTTP 200 Accepted and processing
+                    Path path = Paths.get(URI);
+                    Files.delete(path);
+                    estatusCode = 200;
+                    msj = "DELETED";
+                    bis2 = new BufferedInputStream(new FileInputStream("delete.html"));
+                    bis2.available();
+                    contentSize = bis2.available();
+                    enviarRecurso(bis2);
+                }
+            }catch(IOException e){
+                //Implement 505
+            }
         }
 
         @Override
         public void doConnect(HttpRequest httpRequest) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            throw new UnsupportedOperationException("Not supported yet.");
         }
 
         @Override
         public void doOptions(HttpRequest httpRequest) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            throw new UnsupportedOperationException("Not supported yet.");
         }
 
         @Override
         public void doTrace(HttpRequest httpRequest) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            throw new UnsupportedOperationException("Not supported yet.");
         }
         
         
@@ -490,7 +526,7 @@ public class ServidorWeb {
 
             resources.put(archivo.getName(), resource);
         }
-        ExecutorService connectionPool = Executors.newFixedThreadPool(10);
+        ExecutorService connectionPool = Executors.newFixedThreadPool(100);
         for (;;) {
             System.out.println("Esperando por Cliente....");
             Socket accept = ss.accept();

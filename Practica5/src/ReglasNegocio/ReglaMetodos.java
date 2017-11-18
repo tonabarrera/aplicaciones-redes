@@ -27,6 +27,7 @@ public class ReglaMetodos {
         if(resource.getUri().contains("txt")){
             metodos.add("POST");
             metodos.add("PUT");
+            metodos.add("DELETE");
         }
         return metodos;
     }
