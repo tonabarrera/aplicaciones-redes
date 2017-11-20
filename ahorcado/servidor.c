@@ -76,7 +76,7 @@ int main(int argc, char const *argv[]) {
 
         if (getnameinfo((struct sockaddr *)&c_addr, sizeof(c_addr), hbuf, sizeof(hbuf), sbuf, 
             sizeof(sbuf), NI_NUMERICHOST | NI_NUMERICSERV) == 0)
-            printf("Cliente conectado desde %s:%s\n", hbuf,sbuf);
+            printf("Cliente conectado desde %s:%s\n", hbuf, sbuf);
         int opcion;
         int n = read(clienteSocket, &opcion, sizeof(opcion));
         opcion = ntohl(opcion);

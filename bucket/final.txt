@@ -1,0 +1,19 @@
+Arreglos desordenados:
+8 14 19 16 3 0 0 8 17 1 16 14 3 1 15 8 14 19 3 6 
+SOY EL SERVIDOR #0
+SOY EL SERVIDOR #1
+SOY EL SERVIDOR #2
+SOY EL SERVIDOR #3
+SOY EL SERVIDOR #4
+Servidor listo, esperando..
+Servidor listo, esperando..
+Servidor listo, esperando..
+Servidor listo, esperando..
+Servidor listo, esperando..
+Cliente conectado desde 127.0.0.1:38444
+Cliente conectado desde 127.0.0.1:56388
+Cliente conectado desde 127.0.0.1:35222
+Cliente conectado desde 127.0.0.1:56650
+Cliente conectado desde 127.0.0.1:47254
+Arreglo ordenado:
+0 0 1 1 3 3 3 6 8 8 8 14 14 14 15 16 16 17 19 19 
