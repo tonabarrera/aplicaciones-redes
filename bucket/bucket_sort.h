@@ -7,7 +7,7 @@
 #include "comunicacion_sockets.h"
 #include "merge_sort.h"
 
-#define TAM 100
+#define TAM 1000
 
 struct Mensaje{
     int tam;
