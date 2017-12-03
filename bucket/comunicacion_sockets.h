@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 
-
+// Definicion de las funciones que se utilizan
 int iniciar_servidor(const char *);
 int iniciar_cliente(const char *);
 void manejador_errores(int, char *);

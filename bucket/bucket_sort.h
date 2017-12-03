@@ -7,13 +7,15 @@
 #include "comunicacion_sockets.h"
 #include "merge_sort.h"
 
-#define TAM 1000
-
+// Tamaño del arreglo de numeros aleatorios a ordenar
+#define TAM 100
+// Mensaje que se envia entre clientes y servidores
+// Contiene el arreglo de numeros y su tamaño
 struct Mensaje{
     int tam;
     int *numeros;
 };
-
+// Definicion de las funciones que se utilizan
 void *cliente(void *);
 void *servidor(void *);
 void llenar_numeros();

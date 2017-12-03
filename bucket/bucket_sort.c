@@ -1,5 +1,6 @@
 #include "bucket_sort.h"
 
+// Creamos N servidores que ordenaran una cubeta
 void crear_servidores(int N) {
     pthread_t hilos[N];
     int error;
@@ -13,12 +14,15 @@ void crear_servidores(int N) {
     sleep(1);
 }
 
+// Se crean los clientes y se seleccionan los numeros
+// que perteneceran a su cubeta 
 void crear_clientes(int N) {
     int rango = TAM/N;
     pthread_t hilos[N];
     int *indices;
     int inicio = 0;
     int error;
+    // Creacion de hilos y seleccion de numeros
     for (int i = 0; i < N; ++i) {
         indices = (int *) malloc(sizeof(int)*3);
         indices[0] = i;
@@ -31,6 +35,8 @@ void crear_clientes(int N) {
         if(error)
             manejador_errores(error, "CREAR CLIENTE");
     }
+    // Se espera a que termine cada hilo en orden para introducir
+    // Los elementos en el arrreglo final
     int iniciar = 0;
     for (int i = 0; i < N; i++){
         int *ordenados;
@@ -41,6 +47,7 @@ void crear_clientes(int N) {
     }
 }
 
+// Funcion que mete los cubetas ordenadas en el arreglo final
 int meter(int *ordenados, int inicio) {
     int i = 0;
     while (ordenados[i] != -1){
@@ -49,6 +56,7 @@ int meter(int *ordenados, int inicio) {
     return inicio;
 }
 
+// Generacion de numeros aleatorios
 void llenar_numeros() {
     srand(time(NULL));
     for (int i=0; i < TAM; i++) {
@@ -58,6 +66,8 @@ void llenar_numeros() {
     printf("\n");
 }
 
+// Servidor que se encarga de recibir una cubeta del cliente
+// la ordena por merge-sort y la devuelve al cliente
 void *servidor(void *indice) {
     int *dato = (int *)indice;
     int puerto = 8000 + dato[0];
@@ -96,6 +106,9 @@ void *servidor(void *indice) {
     return NULL;
 }
 
+// El cliente simplemente se conecta al servidor y envia
+// su cubeta, espera y la recibe para proceder a mandarla
+// al hilo principal
 void *cliente(void *indices) {
     int *datos = (int *)indices;
     int desordenados[TAM];
