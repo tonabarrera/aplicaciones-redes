@@ -1,5 +1,6 @@
 #include "comunicacion_sockets.h"
 
+// Crea un servidor socket
 int iniciar_servidor(const char *PUERTO) {
     struct addrinfo *lista;
     struct addrinfo hints;
@@ -51,7 +52,7 @@ int iniciar_servidor(const char *PUERTO) {
     return serverSocket;
 }
 
-
+// Crea un cliente socket
 int iniciar_cliente(const char *PUERTO) {
     struct addrinfo hints, *servinfo, *p;
     // descriptor, mandar datos, bits enviados
@@ -95,12 +96,14 @@ int iniciar_cliente(const char *PUERTO) {
     return clienteSocket;
 }
 
+// Para desplegar errores
 void manejador_errores(int error, char *msj) {
     errno = error;
     perror(msj);
     exit(EXIT_FAILURE); 
 }
 
+// Para desplegar errores
 void desplegar_error(char *msj) {
     perror(msj);
     exit(EXIT_FAILURE);
