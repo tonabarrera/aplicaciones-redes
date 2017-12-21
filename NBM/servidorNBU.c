@@ -82,7 +82,8 @@ int main(int argc, char** argv)  {
         fprintf(stderr, "servidor: error en bind\n");
         exit(1);
     }//if
-    
+
+
     int flags = fcntl(sd, F_GETFL, 0);
     fcntl(sd, F_SETFL, flags | O_NONBLOCK);
     FD_ZERO(&a);
